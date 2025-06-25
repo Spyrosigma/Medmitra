@@ -79,9 +79,7 @@ async def vision_agent(case_id: str):
                 )
                 logger.info(f"Updated ai_summary for file_id: {file_id}")
             except Exception as e:
-                logger.error(f"Failed to update ai_summary for file_id {file_id}: {str(e)}")
-
-    # await supabase.update_case_status(case_id=case_id, status="completed")
+                logger.error(f"Failed to update ai_summary for file_id {file_id}: {str(e)}")    
     
-    return mapping
+    return True
 

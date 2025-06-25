@@ -2,11 +2,13 @@ from typing import List, Dict, Optional, Any
 import json
 from utils.base_agent import BaseAgent
 from models.state_models import AnalysisState
+
 from utils.prompts import (
     DOMAIN_ANALYSIS_PROMPT,
     DYNAMIC_PROMPT_GENERATOR,
     ENTITY_EXTRACTOR_PROMPT
 )
+
 from langgraph.graph import StateGraph, END
 from utils.llm_utils import LLMManager
 
@@ -38,6 +40,7 @@ class MedMitraAgent(BaseAgent):
 
         return builder.compile()
 
+
     async def _labdoc_extraction(self, state: AnalysisState) -> AnalysisState:
         """Analyze the domain of the document"""
         domain = await self.llm_manager.generate_response(
@@ -47,6 +50,7 @@ class MedMitraAgent(BaseAgent):
         logger.info(f"Domain analysis---------->: {domain}")
         state["domain_analysis"] = domain
         return state
+
 
     async def _radiology_extraction(self, state: AnalysisState) -> AnalysisState:
         """Generate the extraction prompt based on domain analysis and schema"""

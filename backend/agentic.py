@@ -3,13 +3,15 @@ import tempfile
 import os
 from typing import List, Optional, Dict, Any
 from agents.vision_agent import image_extraction
-logger = logging.getLogger(__name__)
 from parsers.parse import process_pdf_async
 from agents.vision_agent import vision_agent
-
 from supabase_client.supabase_client import SupabaseCaseClient
-supabase = SupabaseCaseClient()
+from models.data_models import ProcessedFile, CaseInput, PatientData
+from agents.medical_ai_agent import MedicalInsightsAgent
 
+logger = logging.getLogger(__name__)
+
+supabase = SupabaseCaseClient()
 
 async def agentic_process(
     case_id: str, 
@@ -21,19 +23,9 @@ async def agentic_process(
     lab_files: Optional[List[Dict[str, Any]]] = None,
     radiology_files: Optional[List[Dict[str, Any]]] = None
 ):
-    """
-    Agentic process for a case.
+    """agentic process for medical analysis"""
     
-    Args:
-        case_id: Unique identifier for the case
-        user_id: User who created the case
-        patient_name: Name of the patient
-        patient_age: Age of the patient
-        patient_gender: Gender of the patient
-        case_summary: Optional summary provided by the doctor
-        lab_files: List of dictionaries containing lab file data (metadata + content)
-        radiology_files: List of dictionaries containing radiology file data (metadata + content)
-    """
+    logger.info(f"Starting agentic process for case {case_id}")
     
     logger.info(f"Starting agentic process for user ------ {user_id} and case ------ {case_id}")
     logger.info(f"Patient: {patient_name}, Age: {patient_age}, Gender: {patient_gender}")
@@ -80,17 +72,52 @@ async def agentic_process(
         if result:
             logger.info(f"Successfully processed radiology files for case {case_id}")
 
-    await supabase.update_case_status(case_id=case_id, status="completed")
+    # After processing files, we can now generate AI insights
+    try:
+        case_files = await supabase.get_case_files(case_id=case_id)
+        
+        processed_lab_files = []
+        processed_radiology_files = []
+        
+        for file_record in case_files:
+            processed_file = ProcessedFile(
+                file_id=file_record["file_id"],
+                file_name=file_record["file_name"],
+                file_type=file_record["file_type"],
+                file_category=file_record["file_category"],
+                text_data=file_record.get("text_data",None),
+                ai_summary=file_record.get("ai_summary",None)
+            )
+            
+            if file_record["file_category"] == "lab":
+                processed_lab_files.append(processed_file)
+            elif file_record["file_category"] == "radiology":
+                processed_radiology_files.append(processed_file)
+        
+      
+        case_input = CaseInput(
+            case_id=case_id,
+            patient_data=PatientData(
+                name=patient_name,
+                age=patient_age,
+                gender=patient_gender
+            ),
+            doctor_case_summary=case_summary,
+            lab_files=processed_lab_files,
+            radiology_files=processed_radiology_files
+        )
+        
 
-    # Generate a summary of the case using the summaries of the LAB and RADIOLOGY documents  + The information provided by the doctor.
+        medical_agent = MedicalInsightsAgent()
+        medical_insights = await medical_agent.process(case_input)
+        
+        logger.info(f"Successfully generated medical insights for case {case_id}")
+        await supabase.update_case_status(case_id=case_id, status="completed")
+        
+    except Exception as e:
+        logger.error(f"Error in AI insights generation: {e}")
+        await supabase.update_case_status(case_id=case_id, status="failed")
+        raise e
 
-    # Generate SOAP (Subjective, Objective, Assessment, Plan) note using the summary of the case.
-
-    # Generate a diagnosis using the SOAP note.
-    # Generate a Differential diagnosis using the SOAP note.
-    # Generate a list of recommended Investigation & treatment suggestions using the SOAP note.
-    # A single confidence score for the combined output
-
-    logger.info(f"Completed agentic process for user ------ {user_id} and case ------ {case_id}")
-
+    logger.info(f"Completed enhanced agentic process for case {case_id}")
     return "done"

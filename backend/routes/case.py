@@ -164,8 +164,6 @@ async def get_case_by_id(
         raise HTTPException(status_code=500, detail=f"Internal server error: {str(e)}")
 
 
-
-
 # I'll Later finish these routes. Below are incomplete routes.
 
  
