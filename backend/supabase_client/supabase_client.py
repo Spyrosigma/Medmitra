@@ -1,10 +1,3 @@
-"""
-Supabase Client Package for managing chat sessions and document relationships.
-
-This module provides a clean, object-oriented interface for interacting with 
-Supabase chat sessions and document management.
-"""
-
 from typing import Optional, Dict, List, Union, Any
 import os, json
 import uuid
@@ -132,7 +125,7 @@ class SupabaseCaseClient:
         except Exception as e:
             raise SupabaseClientError(f"Error retrieving cases: {str(e)}")
 
-    async def get_case_by_id(self, user_id: str, case_id: str) -> Dict[str, Any]:
+    async def get_case_by_id(self, case_id: str) -> Dict[str, Any]:
         """
         Get a specific case by ID.
 
@@ -150,7 +143,6 @@ class SupabaseCaseClient:
             result = (
                 self.supabase.table("cases")
                 .select("*")
-                .eq("doctor_id", user_id)
                 .eq("case_id", case_id)
                 .execute()
             )
@@ -190,7 +182,7 @@ class SupabaseCaseClient:
 
 
 
-    async def upload_case_file(self, case_id: int, file_data: Dict[str, Any], file_content) -> Dict[str, Any]:
+    async def upload_case_file(self, file_id: str, case_id: int, file_data: Dict[str, Any], file_content) -> Dict[str, Any]:
         """
         Upload a file for a case.
 
@@ -209,8 +201,8 @@ class SupabaseCaseClient:
             results = self.supabase.storage.from_('labdocs').upload(file_data.get('file_url'), file=file_content)
             
             public_url = self.supabase.storage.from_('labdocs').get_public_url(file_data.get('file_url'))
-                        
             file_record = {
+                "file_id": file_id,
                 "case_id": case_id,
                 "file_name": file_data.get("file_name"),
                 "file_type": file_data.get("file_type"),
@@ -233,7 +225,6 @@ class SupabaseCaseClient:
         except Exception as e:
             raise SupabaseClientError(f"Error uploading file: {str(e)}")
 
-
     async def get_case_files(self, case_id: int) -> List[Dict[str, Any]]:
         """
         Get all files for a case.
@@ -252,7 +243,6 @@ class SupabaseCaseClient:
                 self.supabase.table("case_files")
                 .select("*")
                 .eq("case_id", case_id)
-                .order("upload_date", desc=True)
                 .execute()
             )
 
@@ -261,6 +251,38 @@ class SupabaseCaseClient:
 
         except Exception as e:
             raise SupabaseClientError(f"Error retrieving case files: {str(e)}")
+
+    async def update_case_file_metadata(self, file_id: int, metadata: Dict[str, Any]) -> Dict[str, Any]:
+        """
+        Update metadata for a specific case file.
+
+        Args:
+            file_id (int): The ID of the file to update (primary key).
+            metadata (Dict[str, Any]): Metadata to update.
+
+        Returns:
+            Dict[str, Any]: The updated file record.
+
+        Raises:
+            SupabaseClientError: If there's an error updating the file metadata.
+        """
+        try:
+            update_response = (
+                self.supabase.table("case_files")
+                .update(metadata)
+                .eq("file_id", file_id)
+                .execute()
+            )
+            response_data = update_response.model_dump().get("data", [])
+            if response_data:
+                return response_data[0]
+            else:
+                raise SupabaseClientError("Failed to update file metadata")
+
+        except Exception as e:
+            raise SupabaseClientError(f"Error updating file metadata: {str(e)}")
+
+    
 
     async def get_file_by_id(self, file_id: int) -> Dict[str, Any]:
         """

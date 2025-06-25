@@ -55,7 +55,7 @@ async def create_case(
     try:
         
         case_id = str(uuid.uuid4())
-        # Create the case first
+
         result = await supabase_client.create_new_case(
             case_id=case_id,
             user_id=user_id,
@@ -65,52 +65,51 @@ async def create_case(
             case_summary=case_summary,
         )
         
-        # case_id = result.get('case_id')
-        uploaded_files = []
-        
-
-        if lab_files:
-            for file in lab_files:
+        # Process all files with a helper function to avoid redundancy
+        async def process_files(files, category):
+            processed_files = []
+            for file in files or []:
                 if file.filename:
+                    file_id = str(uuid.uuid4())
                     file_content = await file.read()
                     file_data = {
+                        "file_id": file_id,
                         "file_name": file.filename,
                         "file_type": file.content_type,
                         "file_size": len(file_content),
-                        "file_url": f"lab_files/{case_id}/{file.filename}",
-                        "file_category": "lab",
+                        "file_url": f"{category}_files/{case_id}/{file.filename}",
+                        "file_category": category,
                     }
+                    
+                    # Upload to storage
                     file_result = await supabase_client.upload_case_file(
+                        file_id = file_id,
                         case_id=case_id,
                         file_data=file_data,
                         file_content=file_content
                     )
                     uploaded_files.append(file_result)
+                    
+                    # Store for background processing (with actual content)
+                    processed_files.append({**file_data, "file_content": file_content})
+            
+            return processed_files
         
-        
-        if radiology_files:
-            for file in radiology_files:
-                if file.filename: 
-                    file_content = await file.read()
-                    file_data = {
-                        "file_name": file.filename,
-                        "file_type": file.content_type,
-                        "file_size": len(file_content),
-                        "file_url": f"radiology_files/{case_id}/{file.filename}",
-                        "file_category": "radiology",
-                    }
-                    file_result = await supabase_client.upload_case_file(
-                        case_id=case_id,
-                        file_data=file_data,
-                        file_content=file_content
-                    )
-                    uploaded_files.append(file_result)
+        uploaded_files = []
+        lab_files_data = await process_files(lab_files, "lab")
+        radiology_files_data = await process_files(radiology_files, "radiology")
 
-        # Schedule background task after successful case creation
+        # Schedule background task after successful case creation with all parameters including file content
         background_tasks.add_task(
             agentic_process,
             case_id=case_id,
             user_id=user_id,
+            patient_name=patient_name,
+            patient_age=patient_age,
+            patient_gender=patient_gender,
+            case_summary=case_summary,
+            lab_files=lab_files_data if lab_files_data else None,
+            radiology_files=radiology_files_data if radiology_files_data else None,
         )
         
         return JSONResponse(
@@ -147,14 +146,15 @@ async def get_all_cases(user_id: str):
 @router.get("/cases/{case_id}")
 async def get_case_by_id(
     case_id: str,
-    user_id: str = Depends(get_current_user_id)
 ):
     """Get a specific case by ID."""
     try:
-        case = await supabase_client.get_case_by_id(user_id=user_id, case_id=case_id)
+        case = await supabase_client.get_case_by_id(case_id=case_id)
+        case_files_data = await supabase_client.get_case_files(case_id=case_id)
+
         return JSONResponse(
             status_code=200,
-            content={"case": case}
+            content={"case": case, "files": case_files_data}
         )
     except SupabaseClientError as e:
         if "not found" in str(e).lower():

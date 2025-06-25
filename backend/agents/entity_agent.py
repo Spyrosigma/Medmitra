@@ -7,13 +7,13 @@ from utils.prompts import (
     DYNAMIC_PROMPT_GENERATOR,
     ENTITY_EXTRACTOR_PROMPT
 )
-
 from langgraph.graph import StateGraph, END
 from utils.llm_utils import LLMManager
 
 import logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
+
 
 class MedMitraAgent(BaseAgent):
 

@@ -4,11 +4,13 @@ load_dotenv()
 # from core.config import GROQ_API_KEY
 import logging
 import asyncio
-
+from supabase_client.supabase_client import SupabaseCaseClient
 import os 
 logger = logging.getLogger(__name__)
 
+
 client = Groq(api_key=os.getenv("GROQ_API_KEY"))
+supabase = SupabaseCaseClient()
 
 
 async def image_extraction(image_url: str):
@@ -48,6 +50,38 @@ async def image_extraction(image_url: str):
     return completion.choices[0].message.content
 
 
+async def vision_agent(case_id: str):
+    """
+    Vision agent for a image.
+    
+    Args:
+        case_id: Case ID for which to process images
+    """
+    
+    logger.info(f"Starting vision agent for case ------ {case_id}")
 
-# if __name__ == "__main__":
-#     asyncio.run(vision_agent("https://xtobirvqzftrebnacszv.supabase.co/storage/v1/object/public/labdocs/radiology_files/1389d7c4-faa2-47f2-9475-888ef6a5958f/WhatsApp%20Image%202025-06-15%20at%2021.13.24.jpeg"))
+    results = await supabase.get_case_files(case_id=case_id)
+    print(f"Results: {results}")
+    mapping = {}
+    
+    for result in results:
+        file_id = result.get("file_id")
+        file_url = result.get("file_url")
+        file_category = result.get("file_category")
+
+        if file_category == "radiology":
+            ai_summary = await image_extraction(file_url)
+            mapping[file_id] = ai_summary
+            try:
+                await supabase.update_case_file_metadata(
+                    file_id=file_id, 
+                    metadata={"ai_summary": ai_summary}
+                )
+                logger.info(f"Updated ai_summary for file_id: {file_id}")
+            except Exception as e:
+                logger.error(f"Failed to update ai_summary for file_id {file_id}: {str(e)}")
+
+    # await supabase.update_case_status(case_id=case_id, status="completed")
+    
+    return mapping
+
