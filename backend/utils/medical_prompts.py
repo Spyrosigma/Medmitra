@@ -4,50 +4,44 @@ LAB_ANALYSIS_PROMPT: Final = '''
 Analyze the provided laboratory document and extract structured information. Return STRICT JSON only.
 
 Required JSON structure:
-{
-  "lab_values": {
-    "<test_name>": {
+{{
+  "lab_values": {{
+    "<test_name>": {{
       "value": "<numeric_value>",
       "unit": "<unit>",
       "reference_range": "<range>",
       "status": "<normal|abnormal|critical>"
-    }
-  },
+    }}
+  }},
   "summary": "<string>",
   "key_abnormalities": ["<string>"],
   "confidence_score": <number>
-}
+}}
 
 Guidelines:
 - Extract all numerical lab values with units
 - Identify abnormal values based on reference ranges
 - Provide a concise medical summary
 - Include confidence score (0-1)
-
-Document text:
-{document_text}
 '''
 
 RADIOLOGY_ANALYSIS_PROMPT: Final = '''
-Analyze the provided radiology report and extract key findings. Return STRICT JSON only.
+Analyze the provided radiology report image and extract key findings. Return STRICT JSON only.
 
 Required JSON structure:
-{
+{{
   "findings": "<string>",
   "impressions": "<string>",
   "summary": "<string>",
   "key_abnormalities": ["<string>"],
   "confidence_score": <number>
-}
+}}
 
 Guidelines:
 - Extract key radiological findings
 - Summarize clinical impressions
 - Identify significant abnormalities
 - Provide overall summary
-
-Document text:
-{document_text}
 '''
 
 CASE_SUMMARY_PROMPT: Final = '''
@@ -60,11 +54,11 @@ Input Information:
 - Radiology Summaries: {radiology_summaries}
 
 Required JSON structure:
-{
+{{
   "summary": "<comprehensive_case_summary>",
   "key_findings": ["<key_finding_1>", "<key_finding_2>"],
   "confidence_score": <number>
-}
+}}
 
 Guidelines:
 - Synthesize all available information
@@ -80,13 +74,13 @@ Case Summary:
 {case_summary}
 
 Required JSON structure:
-{
+{{
   "subjective": "<patient_reported_symptoms_and_history>",
   "objective": "<objective_findings_from_exams_and_tests>",
   "assessment": "<clinical_assessment_and_working_diagnosis>",
   "plan": "<treatment_and_management_plan>",
   "confidence_score": <number>
-}
+}}
 
 Guidelines:
 - Follow standard SOAP format
@@ -102,13 +96,13 @@ SOAP Note:
 {soap_note}
 
 Required JSON structure:
-{
+{{
   "diagnosis": "<primary_diagnosis>",
   "icd_code": "<icd_10_code>",
   "description": "<detailed_description>",
   "supporting_evidence": ["<evidence_1>", "<evidence_2>"],
   "confidence_score": <number>
-}
+}}
 
 Guidelines:
 - Provide most likely primary diagnosis
@@ -124,16 +118,16 @@ SOAP Note: {soap_note}
 Primary Diagnosis: {primary_diagnosis}
 
 Required JSON structure:
-{
+{{
   "differential_diagnoses": [
-    {
+    {{
       "condition": "<condition_name>",
       "probability": <probability_0_to_1>,
       "reasoning": "<clinical_reasoning>",
       "distinguishing_factors": ["<factor_1>", "<factor_2>"]
-    }
+    }}
   ]
-}
+}}
 
 Guidelines:
 - List 3-5 most relevant differential diagnoses
@@ -149,25 +143,25 @@ SOAP Note: {soap_note}
 Primary Diagnosis: {diagnosis}
 
 Required JSON structure:
-{
+{{
   "investigations": [
-    {
+    {{
       "type": "<investigation_type>",
       "urgency": "<urgent|routine|follow-up>",
       "rationale": "<clinical_rationale>",
       "expected_findings": "<expected_results>"
-    }
+    }}
   ],
   "treatments": [
-    {
+    {{
       "type": "<treatment_type>",
       "description": "<treatment_description>",
       "dosage": "<dosage_if_applicable>",
       "duration": "<duration_if_applicable>",
       "precautions": ["<precaution_1>", "<precaution_2>"]
-    }
+    }}
   ]
-}
+}}
 
 Guidelines:
 - Recommend appropriate investigations

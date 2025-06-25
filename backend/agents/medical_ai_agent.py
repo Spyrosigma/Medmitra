@@ -13,6 +13,8 @@ from langgraph.graph import StateGraph, END
 from utils.llm_utils import LLMManager
 from supabase_client.supabase_client import SupabaseCaseClient
 
+from utils.medical_prompts import LAB_ANALYSIS_PROMPT, CASE_SUMMARY_PROMPT, SOAP_NOTE_PROMPT, DIAGNOSIS_PROMPT, DIFFERENTIAL_DIAGNOSIS_PROMPT, RECOMMENDATIONS_PROMPT
+
 import logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -71,8 +73,8 @@ class MedicalInsightsAgent(BaseAgent):
         for lab_file in state["case_input"].lab_files:
             if lab_file.text_data:
                 # Extract lab values and generate summary
-                lab_analysis = await self._analyze_lab_document(lab_file.text_data)
-                
+                lab_analysis = await self.llm_manager.generate_response(system_prompt=LAB_ANALYSIS_PROMPT, user_input=lab_file.text_data)
+                logger.info(f"Lab analysis for {lab_file.file_name}: {lab_analysis}")
                 lab_doc = LabDocument(
                     file_id=lab_file.file_id,
                     file_name=lab_file.file_name,

@@ -23,7 +23,6 @@ class LLMManager:
     
     def __init__(self, model_name: str = "llama-3.3-70b-versatile", temperature: float = 0.7):
         self.llm = ChatGroq(model_name=model_name, temperature=temperature)
-        self.parser = parser
 
     async def generate_response(self, system_prompt: str, user_input: str) -> dict:
         prompt = ChatPromptTemplate.from_messages([
@@ -31,7 +30,7 @@ class LLMManager:
             ("user", "{input}")
         ])
         
-        chain = prompt | self.llm | self.parser
+        chain = prompt | self.llm
         result = chain.invoke({"input": user_input})
         return result
 

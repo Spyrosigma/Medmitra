@@ -6,6 +6,8 @@ import logging
 import asyncio
 from supabase_client.supabase_client import SupabaseCaseClient
 import os 
+from utils.medical_prompts import RADIOLOGY_ANALYSIS_PROMPT
+
 logger = logging.getLogger(__name__)
 
 
@@ -29,7 +31,7 @@ async def image_extraction(image_url: str):
                 "content": [
                     {
                         "type": "text",
-                        "text": "What's in this image? Just give me the summary of the image."
+                        "text": RADIOLOGY_ANALYSIS_PROMPT
                     },
                     {
                         "type": "image_url",

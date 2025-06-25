@@ -72,6 +72,8 @@ async def agentic_process(
         if result:
             logger.info(f"Successfully processed radiology files for case {case_id}")
 
+    # await supabase.update_case_status(case_id=case_id, status="completed")
+
     # After processing files, we can now generate AI insights
     try:
         case_files = await supabase.get_case_files(case_id=case_id)
