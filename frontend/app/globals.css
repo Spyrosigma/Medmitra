@@ -1,0 +1,196 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 0 0% 100%; /* #ffffff */
+    --foreground: 210 22% 22%; /* #1f2937 - charcoal */
+    --card: 210 20% 98%; /* #f8fafc */
+    --card-foreground: 210 22% 22%; /* #1f2937 */
+    --popover: 0 0% 100%; /* #ffffff */
+    --popover-foreground: 210 22% 22%; /* #1f2937 */
+    --primary: 213 94% 68%; /* #2563eb - deep medical blue */
+    --primary-foreground: 0 0% 100%; /* white text on primary */
+    --secondary: 188 95% 68%; /* #06b6d4 - clean teal */
+    --secondary-foreground: 210 22% 22%; /* #1f2937 */
+    --muted: 210 20% 98%; /* #f8fafc */
+    --muted-foreground: 210 14% 46%; /* #6b7280 - medium gray */
+    --accent: 160 84% 39%; /* #059669 - success green */
+    --accent-foreground: 0 0% 100%; /* white text on accent */
+    --destructive: 0 84% 60%; /* red for errors */
+    --destructive-foreground: 0 0% 100%;
+    --border: 210 20% 90%; /* light border */
+    --input: 210 20% 96%; /* input background */
+    --ring: 213 94% 68%; /* focus ring - primary blue */
+    --radius: 0.5rem;
+    --chart-1: 213 94% 68%; /* primary blue */
+    --chart-2: 188 95% 68%; /* teal */
+    --chart-3: 160 84% 39%; /* success green */
+    --chart-4: 210 14% 46%; /* medium gray */
+    --chart-5: 210 22% 22%; /* charcoal */
+  }
+
+  .dark {
+    --background: 210 22% 12%; /* dark charcoal background */
+    --foreground: 210 20% 90%; /* light text */
+    --card: 210 22% 15%; /* dark card */
+    --card-foreground: 210 20% 90%;
+    --popover: 210 22% 15%;
+    --popover-foreground: 210 20% 90%;
+    --primary: 214 88% 56%; /* #1e40af - darker medical blue */
+    --primary-foreground: 0 0% 100%;
+    --secondary: 185 84% 56%; /* #0891b2 - darker teal */
+    --secondary-foreground: 0 0% 100%;
+    --muted: 210 22% 18%;
+    --muted-foreground: 210 14% 60%;
+    --accent: 160 84% 39%; /* same success green */
+    --accent-foreground: 0 0% 100%;
+    --destructive: 0 75% 55%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 210 22% 25%;
+    --input: 210 22% 20%;
+    --ring: 214 88% 56%;
+    --chart-1: 214 88% 56%;
+    --chart-2: 185 84% 56%;
+    --chart-3: 160 84% 39%;
+    --chart-4: 210 14% 60%;
+    --chart-5: 210 20% 90%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Inter", sans-serif;
+    background: linear-gradient(to bottom, #ffffff, #f8fafc);
+    min-height: 100vh;
+    color: hsl(var(--foreground));
+  }
+
+  .dark body {
+    background: linear-gradient(to bottom, hsl(210, 22%, 12%), hsl(210, 22%, 8%));
+  }
+}
+
+@layer components {
+  /* Professional medical animations */
+  @keyframes pulse-soft {
+    0%, 100% {
+      opacity: 1;
+    }
+    50% {
+      opacity: 0.8;
+    }
+  }
+
+  @keyframes slide-up {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes fade-in {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+
+  @keyframes scale-in {
+    from {
+      opacity: 0;
+      transform: scale(0.95);
+    }
+    to {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+
+  .animate-pulse-soft {
+    animation: pulse-soft 2s ease-in-out infinite;
+  }
+
+  .animate-slide-up {
+    animation: slide-up 0.6s ease-out forwards;
+  }
+
+  .animate-fade-in {
+    animation: fade-in 0.5s ease-out forwards;
+  }
+
+  .animate-scale-in {
+    animation: scale-in 0.3s ease-out forwards;
+  }
+
+  /* Medical theme gradient text */
+  .gradient-text {
+    background: linear-gradient(
+      135deg,
+      hsl(var(--primary)) 0%,
+      hsl(var(--secondary)) 100%
+    );
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  /* Enhanced medical shadows */
+  .shadow-medical {
+    box-shadow: 0 4px 6px -1px rgba(37, 99, 235, 0.1), 0 2px 4px -1px rgba(37, 99, 235, 0.06);
+  }
+
+  .shadow-medical-lg {
+    box-shadow: 0 10px 15px -3px rgba(37, 99, 235, 0.1), 0 4px 6px -2px rgba(37, 99, 235, 0.05);
+  }
+
+  /* Medical button variants */
+  .btn-medical {
+    @apply bg-primary text-primary-foreground hover:bg-primary/90 transition-colors duration-200;
+  }
+
+  .btn-medical-secondary {
+    @apply bg-secondary text-secondary-foreground hover:bg-secondary/90 transition-colors duration-200;
+  }
+
+  .btn-medical-success {
+    @apply bg-accent text-accent-foreground hover:bg-accent/90 transition-colors duration-200;
+  }
+}
+
+@layer utilities {
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* Medical utility classes */
+  .text-medical-primary {
+    color: hsl(var(--primary));
+  }
+
+  .text-medical-secondary {
+    color: hsl(var(--secondary));
+  }
+
+  .text-medical-success {
+    color: hsl(var(--accent));
+  }
+
+  .bg-medical-soft {
+    background-color: hsl(var(--card));
+  }
+}
