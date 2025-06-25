@@ -45,6 +45,7 @@ export interface Case {
   uploaded_files?: UploadedFile[];
   ai_suggestions?: AISuggestion[];
   feedback?: Feedback[];
+  files?: CaseFile[];
 }
 
 export interface UploadedFile {
@@ -54,6 +55,20 @@ export interface UploadedFile {
   size: number;
   url: string;
   uploaded_at: string;
+}
+
+export interface CaseFile {
+  id: number;
+  case_id: string;
+  file_name: string;
+  file_type: string;
+  file_size: number;
+  file_url: string;
+  file_category: "lab" | "radiology";
+  upload_date: string;
+  file_id: string;
+  ai_summary?: string;
+  text_data?: string;
 }
 
 export interface AISuggestion {

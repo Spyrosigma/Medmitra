@@ -40,6 +40,7 @@ export interface ApiResponse<T = any> {
   case_id?: string;
   case?: T;
   uploaded_files?: any[];
+  files?: any[];
 }
 
 class ApiClient {

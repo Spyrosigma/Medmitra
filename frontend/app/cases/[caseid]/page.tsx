@@ -5,8 +5,8 @@ import { useParams, useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
-import { ArrowLeft, Download, Edit, Share } from "lucide-react";
-import { Case } from "@/types/case";
+import { ArrowLeft, Download, Edit, Share, FileText, Image } from "lucide-react";
+import { Case, CaseFile } from "@/types/case";
 import { caseApi, handleApiError } from "@/lib/api-client";
 import { useAuth } from "@/hooks/use-auth";
 
@@ -15,6 +15,7 @@ export default function CaseDetailsPage() {
   const router = useRouter();
   const { userId, loading: authLoading } = useAuth();
   const [case_, setCase] = useState<Case | null>(null);
+  const [files, setFiles] = useState<CaseFile[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -33,7 +34,27 @@ export default function CaseDetailsPage() {
           return;
         }
         
-        setCase(response.case);
+        // Transform the backend case data to match frontend format
+        const transformedCase: Case = {
+          id: response.case.case_id || response.case.id,
+          patient_name: response.case.patient_name,
+          patient_age: response.case.patient_age,
+          patient_gender: response.case.patient_gender,
+          case_summary: response.case.case_summary,
+          status: response.case.status,
+          created_at: response.case.created_at,
+          updated_at: response.case.updated_at,
+          title: response.case.case_summary?.substring(0, 50) + "..." || "Case Summary",
+          patient: {
+            id: `patient-${response.case.id}`,
+            name: response.case.patient_name,
+            age: response.case.patient_age,
+            gender: response.case.patient_gender,
+          },
+        };
+        
+        setCase(transformedCase);
+        setFiles(response.files || []);
       } catch (err) {
         setError(handleApiError(err));
         console.error("Error fetching case:", err);
@@ -137,7 +158,7 @@ export default function CaseDetailsPage() {
           </Button>
           <div>
             <h1 className="text-3xl font-bold tracking-tight">
-              Case #{case_.id.slice(0, 8)}...
+              Case #{case_.id.toString().slice(0, 8)}...
             </h1>
             <div className="flex items-center gap-2 mt-1">
               <Badge variant={getStatusVariant(case_.status)}>
@@ -187,8 +208,8 @@ export default function CaseDetailsPage() {
                 <p className="font-medium">{case_.patient?.gender || case_.patient_gender || 'N/A'}</p>
               </div>
               <div>
-                <label className="text-sm font-medium text-muted-foreground">Case Title</label>
-                <p className="font-medium">{case_.title || case_.case_summary?.substring(0, 50) + "..." || 'N/A'}</p>
+                <label className="text-sm font-medium text-muted-foreground">Case Summary</label>
+                <p className="font-medium">{case_.case_summary || 'N/A'}</p>
               </div>
             </div>
 
@@ -213,6 +234,16 @@ export default function CaseDetailsPage() {
               </div>
             )}
           </Card>
+
+          {/* Case Summary Detail */}
+          {case_.case_summary && (
+            <Card className="p-6">
+              <h3 className="text-lg font-semibold mb-4">Case Summary</h3>
+              <div className="p-4 bg-muted rounded-md">
+                <p>{case_.case_summary}</p>
+              </div>
+            </Card>
+          )}
 
           {/* SOAP Notes */}
           {case_.soap_note && (
@@ -251,21 +282,58 @@ export default function CaseDetailsPage() {
         {/* Sidebar */}
         <div className="space-y-6">
           {/* Uploaded Files */}
-          {case_.uploaded_files && case_.uploaded_files.length > 0 && (
+          {files && files.length > 0 && (
             <Card className="p-6">
               <h3 className="text-lg font-semibold mb-4">Uploaded Files</h3>
               <div className="space-y-3">
-                {case_.uploaded_files.map((file) => (
-                  <div key={file.id} className="flex items-center justify-between p-3 bg-muted rounded-md">
-                    <div>
-                      <p className="font-medium text-sm">{file.name}</p>
-                      <p className="text-xs text-muted-foreground">
-                        {(file.size / 1024 / 1024).toFixed(2)} MB
-                      </p>
+                {files.map((file) => (
+                  <div key={file.file_id} className="p-3 bg-muted rounded-md space-y-2">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <div className="flex-shrink-0">
+                          {file.file_type.startsWith('image/') ? (
+                            <Image className="h-5 w-5 text-muted-foreground" />
+                          ) : (
+                            <FileText className="h-5 w-5 text-muted-foreground" />
+                          )}
+                        </div>
+                        <div>
+                          <p className="font-medium text-sm">{file.file_name}</p>
+                          <div className="flex items-center gap-2 mt-1">
+                            <p className="text-xs text-muted-foreground">
+                              {(file.file_size / 1024 / 1024).toFixed(2)} MB
+                            </p>
+                            <span className="text-xs px-2 py-1 bg-primary/10 text-primary rounded">
+                              {file.file_category}
+                            </span>
+                            <span className="text-xs text-muted-foreground">
+                              {formatDate(file.upload_date)}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                      <Button 
+                        variant="ghost" 
+                        size="sm"
+                        onClick={() => window.open(file.file_url, '_blank')}
+                      >
+                        <Download className="h-4 w-4" />
+                      </Button>
                     </div>
-                    <Button variant="ghost" size="sm">
-                      <Download className="h-4 w-4" />
-                    </Button>
+                    
+                    {file.ai_summary && (
+                      <div className="pt-2 border-t">
+                        <p className="text-xs font-medium text-muted-foreground mb-1">AI Summary:</p>
+                        <p className="text-xs text-muted-foreground">{file.ai_summary}</p>
+                      </div>
+                    )}
+                    
+                    {file.text_data && (
+                      <div className="pt-2 border-t">
+                        <p className="text-xs font-medium text-muted-foreground mb-1">Extracted Text:</p>
+                        <p className="text-xs text-muted-foreground truncate">{file.text_data}</p>
+                      </div>
+                    )}
                   </div>
                 ))}
               </div>
