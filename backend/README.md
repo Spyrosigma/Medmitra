@@ -10,7 +10,7 @@ MedMitra follows a modular, agent-based architecture designed for scalability an
 
 ```
 ┌─────────────────┐    ┌──────────────────┐    ┌─────────────────┐
-│   FastAPI App   │    │   Agentic Core   │    │  AI Agents     │
+│   FastAPI App   │    │   Agentic Core   │    │  AI Agents      │
 │   (Routes)      │───▶│   Orchestrator   │───▶│  - Medical AI   │
 │                 │    │                  │    │  - Vision AI    │
 └─────────────────┘    └──────────────────┘    └─────────────────┘
