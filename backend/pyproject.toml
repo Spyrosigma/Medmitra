@@ -7,6 +7,8 @@ requires-python = ">=3.13"
 dependencies = [
     "fastapi>=0.115.13",
     "groq>=0.28.0",
+    "langchain>=0.3.26",
+    "langchain-groq>=0.3.4",
     "langgraph>=0.4.10",
     "llama-parse>=0.6.36",
     "python-dotenv>=1.1.0",

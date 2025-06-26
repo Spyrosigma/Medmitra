@@ -522,6 +522,24 @@ wheels = [
 ]
 
 [[package]]
+name = "langchain"
+version = "0.3.26"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "langchain-core" },
+    { name = "langchain-text-splitters" },
+    { name = "langsmith" },
+    { name = "pydantic" },
+    { name = "pyyaml" },
+    { name = "requests" },
+    { name = "sqlalchemy" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/7f/13/a9931800ee42bbe0f8850dd540de14e80dda4945e7ee36e20b5d5964286e/langchain-0.3.26.tar.gz", hash = "sha256:8ff034ee0556d3e45eff1f1e96d0d745ced57858414dba7171c8ebdbeb5580c9", size = 10226808 }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/f1/f2/c09a2e383283e3af1db669ab037ac05a45814f4b9c472c48dc24c0cef039/langchain-0.3.26-py3-none-any.whl", hash = "sha256:361bb2e61371024a8c473da9f9c55f4ee50f269c5ab43afdb2b1309cb7ac36cf", size = 1012336 },
+]
+
+[[package]]
 name = "langchain-core"
 version = "0.3.66"
 source = { registry = "https://pypi.org/simple" }
@@ -537,6 +555,31 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/f0/63/470aa84393bad5d51749417af58522a691174f8b2d05843f5633d473faa0/langchain_core-0.3.66.tar.gz", hash = "sha256:350c92e792ec1401f4b740d759b95f297710a50de29e1be9fbfff8676ef62117", size = 560102 }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/c0/c3/8080431fd7567a340d3a42e36c0bb3970a8d00d5e27bf3ca2103b3b55996/langchain_core-0.3.66-py3-none-any.whl", hash = "sha256:65cd6c3659afa4f91de7aa681397a0c53ff9282425c281e53646dd7faf16099e", size = 438874 },
+]
+
+[[package]]
+name = "langchain-groq"
+version = "0.3.4"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "groq" },
+    { name = "langchain-core" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/1b/c0/68c3dba16b45088738b42c8b028197cf700708316fbb1f27e710bf8b4541/langchain_groq-0.3.4.tar.gz", hash = "sha256:ef7e72e49403cc722f361804af1fcb325fa438785e37626eb0c75a2616df179f", size = 22560 }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/2e/58/28f34a58264dfb148bef7b2dc4d8198bec10b9c264448588f741b97b374e/langchain_groq-0.3.4-py3-none-any.whl", hash = "sha256:15e34db3f44b25f359ce3c2abb8b0ae7c07502dbd862667ada856c2850c4c551", size = 15456 },
+]
+
+[[package]]
+name = "langchain-text-splitters"
+version = "0.3.8"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "langchain-core" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/e7/ac/b4a25c5716bb0103b1515f1f52cc69ffb1035a5a225ee5afe3aed28bf57b/langchain_text_splitters-0.3.8.tar.gz", hash = "sha256:116d4b9f2a22dda357d0b79e30acf005c5518177971c66a9f1ab0edfdb0f912e", size = 42128 }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/8b/a3/3696ff2444658053c01b6b7443e761f28bb71217d82bb89137a978c5f66f/langchain_text_splitters-0.3.8-py3-none-any.whl", hash = "sha256:e75cc0f4ae58dcf07d9f18776400cf8ade27fadd4ff6d264df6278bb302f6f02", size = 32440 },
 ]
 
 [[package]]
@@ -767,6 +810,8 @@ source = { virtual = "." }
 dependencies = [
     { name = "fastapi" },
     { name = "groq" },
+    { name = "langchain" },
+    { name = "langchain-groq" },
     { name = "langgraph" },
     { name = "llama-parse" },
     { name = "python-dotenv" },
@@ -780,6 +825,8 @@ dependencies = [
 requires-dist = [
     { name = "fastapi", specifier = ">=0.115.13" },
     { name = "groq", specifier = ">=0.28.0" },
+    { name = "langchain", specifier = ">=0.3.26" },
+    { name = "langchain-groq", specifier = ">=0.3.4" },
     { name = "langgraph", specifier = ">=0.4.10" },
     { name = "llama-parse", specifier = ">=0.6.36" },
     { name = "python-dotenv", specifier = ">=1.1.0" },
