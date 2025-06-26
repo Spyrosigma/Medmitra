@@ -6,7 +6,7 @@ from agents.vision_agent import image_extraction
 from parsers.parse import process_pdf_async
 from agents.vision_agent import vision_agent
 from supabase_client.supabase_client import SupabaseCaseClient
-from models.data_models import ProcessedFile, CaseInput, PatientData
+from models.data_models import ProcessedFile, CaseInput, PatientData, RadiologyDocument
 from agents.medical_ai_agent import MedicalInsightsAgent
 
 logger = logging.getLogger(__name__)
@@ -72,7 +72,6 @@ async def agentic_process(
         if result:
             logger.info(f"Successfully processed radiology files for case {case_id}")
 
-    # await supabase.update_case_status(case_id=case_id, status="completed")
 
     # After processing files, we can now generate AI insights
     try:
@@ -123,3 +122,27 @@ async def agentic_process(
 
     logger.info(f"Completed enhanced agentic process for case {case_id}")
     return "done"
+
+
+# async def main():
+#     case_id = "917034a2-c50e-48f4-8289-963ad7b0ad58"
+#     user_id = "b8acad4b-4944-4d66-b405-de70886e7248"
+#     patient_name = "Jane Daniel"
+#     patient_age = 31
+#     patient_gender = "Female"
+#     case_summary = "Some lung infection i assume"
+
+#     result = await agentic_process(
+#         case_id=case_id,
+#         user_id=user_id,
+#         patient_name=patient_name,
+#         patient_age=patient_age,
+#         patient_gender=patient_gender,
+#         case_summary=case_summary,
+#     )
+#     print("--------------------------------")
+#     print(result)
+
+# if __name__ == "__main__":
+#     asyncio.run(main())
+        

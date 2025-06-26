@@ -5,7 +5,7 @@ from supabase import create_client, Client
 from datetime import datetime
 import pytz
 
-from core.config import SUPABASE_SERVICE_ROLE_KEY, SUPABASE_URL
+from config import SUPABASE_SERVICE_ROLE_KEY, SUPABASE_URL
 import logging
 
 # Simple logger setup
@@ -346,3 +346,177 @@ class SupabaseCaseClient:
             raise SupabaseClientError(f"Error deleting file: {str(e)}")
 
    
+    # AI insights part 
+
+    async def upload_ai_insights(self, case_id: str, insights: Dict[str, Any]) -> Dict[str, Any]:
+        """
+        Upload AI-generated insights for a case.
+
+        Args:
+            case_id (str): The ID of the case to upload insights for.
+            insights (Dict[str, Any]): The AI insights data containing case summary, SOAP note, 
+                                     primary diagnosis, and confidence scores.
+
+        Returns:
+            Dict[str, Any]: The uploaded insights record.
+
+        Raises:
+            SupabaseClientError: If there's an error uploading the insights.
+        """
+        try:
+            # Extract case summary data
+            case_summary = insights.get("case_summary", {})
+            soap_note = insights.get("soap_note", {})
+            primary_diagnosis = insights.get("primary_diagnosis", {})
+            
+            # Prepare the insights record
+            insights_record = {
+                "case_id": case_id,
+                
+                # Case Summary fields
+                "comprehensive_summary": case_summary.get("comprehensive_summary"),
+                "key_findings": json.dumps(case_summary.get("key_findings", [])),
+                "patient_context": json.dumps(case_summary.get("patient_context", {})),
+                "doctor_notes": case_summary.get("doctor_notes"),
+                "lab_summary": case_summary.get("lab_summary"),
+                "radiology_summary": case_summary.get("radiology_summary"),
+                "case_summary_confidence_score": case_summary.get("confidence_score"),
+                
+                # SOAP Note fields
+                "soap_subjective": soap_note.get("subjective"),
+                "soap_objective": soap_note.get("objective"),
+                "soap_assessment": soap_note.get("assessment"),
+                "soap_plan": soap_note.get("plan"),
+                "soap_confidence_score": soap_note.get("confidence_score"),
+                
+                # Primary Diagnosis fields
+                "primary_diagnosis": primary_diagnosis.get("primary_diagnosis"),
+                "icd_code": primary_diagnosis.get("icd_code"),
+                "diagnosis_description": primary_diagnosis.get("description"),
+                "diagnosis_confidence_score": primary_diagnosis.get("confidence_score"),
+                "supporting_evidence": json.dumps(primary_diagnosis.get("supporting_evidence", [])),
+                
+                # Overall metrics
+                "overall_confidence_score": insights.get("overall_confidence_score"),
+                
+                # Metadata
+                "generated_at": insights.get("generated_at").isoformat() if insights.get("generated_at") else datetime.now(pytz.UTC).isoformat(),
+                "created_at": datetime.now(pytz.UTC).isoformat(),
+                "updated_at": datetime.now(pytz.UTC).isoformat(),
+            }
+            
+            # Insert the insights record
+            insert_response = (
+                self.supabase.table("ai_insights").insert(insights_record).execute()
+            )
+
+            response_data = insert_response.model_dump().get("data", [])
+            if response_data:
+                logger.info(f"Successfully uploaded AI insights for case {case_id}")
+                return response_data[0]
+            else:
+                raise SupabaseClientError("Failed to upload AI insights")
+
+        except Exception as e:
+            logger.error(f"Error uploading AI insights for case {case_id}: {str(e)}")
+            raise SupabaseClientError(f"Error uploading AI insights: {str(e)}")
+
+    async def get_ai_insights_by_case_id(self, case_id: str) -> Dict[str, Any]:
+        """
+        Get AI insights for a specific case.
+
+        Args:
+            case_id (str): The ID of the case to retrieve insights for.
+
+        Returns:
+            Dict[str, Any]: The AI insights data.
+
+        Raises:
+            SupabaseClientError: If there's an error retrieving the insights or insights not found.
+        """
+        try:
+            result = (
+                self.supabase.table("ai_insights")
+                .select("*")
+                .eq("case_id", case_id)
+                .order("created_at", desc=True)
+                .limit(1)
+                .execute()
+            )
+
+            data = result.model_dump().get("data", [])
+            if not data:
+                raise SupabaseClientError(f"AI insights for case {case_id} not found")
+
+            # Parse JSON fields back to objects
+            insights = data[0]
+            if insights.get("key_findings"):
+                insights["key_findings"] = json.loads(insights["key_findings"])
+            if insights.get("patient_context"):
+                insights["patient_context"] = json.loads(insights["patient_context"])
+            if insights.get("supporting_evidence"):
+                insights["supporting_evidence"] = json.loads(insights["supporting_evidence"])
+
+            return insights
+
+        except Exception as e:
+            raise SupabaseClientError(f"Error retrieving AI insights: {str(e)}")
+
+    async def update_ai_insights(self, case_id: str, insights: Dict[str, Any]) -> Dict[str, Any]:
+        """
+        Update AI insights for a case (if insights already exist).
+
+        Args:
+            case_id (str): The ID of the case to update insights for.
+            insights (Dict[str, Any]): The updated AI insights data.
+
+        Returns:
+            Dict[str, Any]: The updated insights record.
+
+        Raises:
+            SupabaseClientError: If there's an error updating the insights.
+        """
+        try:
+            # Similar data preparation as upload_ai_insights
+            case_summary = insights.get("case_summary", {})
+            soap_note = insights.get("soap_note", {})
+            primary_diagnosis = insights.get("primary_diagnosis", {})
+            
+            update_data = {
+                "comprehensive_summary": case_summary.get("comprehensive_summary"),
+                "key_findings": json.dumps(case_summary.get("key_findings", [])),
+                "patient_context": json.dumps(case_summary.get("patient_context", {})),
+                "doctor_notes": case_summary.get("doctor_notes"),
+                "lab_summary": case_summary.get("lab_summary"),
+                "radiology_summary": case_summary.get("radiology_summary"),
+                "case_summary_confidence_score": case_summary.get("confidence_score"),
+                "soap_subjective": soap_note.get("subjective"),
+                "soap_objective": soap_note.get("objective"),
+                "soap_assessment": soap_note.get("assessment"),
+                "soap_plan": soap_note.get("plan"),
+                "soap_confidence_score": soap_note.get("confidence_score"),
+                "primary_diagnosis": primary_diagnosis.get("primary_diagnosis"),
+                "icd_code": primary_diagnosis.get("icd_code"),
+                "diagnosis_description": primary_diagnosis.get("description"),
+                "diagnosis_confidence_score": primary_diagnosis.get("confidence_score"),
+                "supporting_evidence": json.dumps(primary_diagnosis.get("supporting_evidence", [])),
+                "overall_confidence_score": insights.get("overall_confidence_score"),
+                "generated_at": insights.get("generated_at").isoformat() if insights.get("generated_at") else datetime.now(pytz.UTC).isoformat(),
+                "updated_at": datetime.now(pytz.UTC).isoformat(),
+            }
+            
+            update_response = (
+                self.supabase.table("ai_insights")
+                .update(update_data)
+                .eq("case_id", case_id)
+                .execute()
+            )
+            
+            response_data = update_response.model_dump().get("data", [])
+            if response_data:
+                return response_data[0]
+            else:
+                raise SupabaseClientError("Failed to update AI insights")
+
+        except Exception as e:
+            raise SupabaseClientError(f"Error updating AI insights: {str(e)}")

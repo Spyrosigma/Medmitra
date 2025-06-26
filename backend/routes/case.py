@@ -151,10 +151,11 @@ async def get_case_by_id(
     try:
         case = await supabase_client.get_case_by_id(case_id=case_id)
         case_files_data = await supabase_client.get_case_files(case_id=case_id)
+        ai_insights = await supabase_client.get_ai_insights_by_case_id(case_id=case_id)
 
         return JSONResponse(
             status_code=200,
-            content={"case": case, "files": case_files_data}
+            content={"case": case, "files": case_files_data, "ai_insights": ai_insights}
         )
     except SupabaseClientError as e:
         if "not found" in str(e).lower():

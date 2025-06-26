@@ -1,7 +1,8 @@
 from llama_cloud_services import LlamaParse
+from config import LLAMAPARSE_API_KEY
 
 parser = LlamaParse(
-    api_key="llx-VglYRh3pejjuCHcyF8naFI4sHAEijRnnyijthZJNzTcNZ6WL",
+    api_key=LLAMAPARSE_API_KEY,
     num_workers=4,
     verbose=False,
     language="en",

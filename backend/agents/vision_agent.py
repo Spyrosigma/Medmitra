@@ -7,11 +7,12 @@ import asyncio
 from supabase_client.supabase_client import SupabaseCaseClient
 import os 
 from utils.medical_prompts import RADIOLOGY_ANALYSIS_PROMPT
+from utils.extractjson import extract_json_from_string
+from config import GROQ_API_KEY
 
 logger = logging.getLogger(__name__)
 
-
-client = Groq(api_key=os.getenv("GROQ_API_KEY"))
+client = Groq(api_key=GROQ_API_KEY)
 supabase = SupabaseCaseClient()
 
 
@@ -49,7 +50,8 @@ async def image_extraction(image_url: str):
         stop=None,
     )
 
-    return completion.choices[0].message.content
+    res = extract_json_from_string(completion.choices[0].message.content)
+    return res
 
 
 async def vision_agent(case_id: str):
@@ -63,7 +65,7 @@ async def vision_agent(case_id: str):
     logger.info(f"Starting vision agent for case ------ {case_id}")
 
     results = await supabase.get_case_files(case_id=case_id)
-    print(f"Results: {results}")
+    # print(f"Results: {results}")
     mapping = {}
     
     for result in results:
@@ -73,6 +75,7 @@ async def vision_agent(case_id: str):
 
         if file_category == "radiology":
             ai_summary = await image_extraction(file_url)
+            logger.info(f"AI Summary for file_id {file_id}: {ai_summary}")
             mapping[file_id] = ai_summary
             try:
                 await supabase.update_case_file_metadata(

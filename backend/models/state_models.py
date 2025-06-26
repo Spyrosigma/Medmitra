@@ -31,9 +31,9 @@ class MedicalAnalysisState(TypedDict):
     case_summary: Optional[CaseSummary]
     soap_note: Optional[SOAPNote]
     primary_diagnosis: Optional[Diagnosis]
-    differential_diagnoses: List[DifferentialDiagnosis]
-    investigation_recommendations: List[InvestigationRecommendation]
-    treatment_recommendations: List[TreatmentRecommendation]
+    # differential_diagnoses: List[DifferentialDiagnosis]
+    # investigation_recommendations: List[InvestigationRecommendation]
+    # treatment_recommendations: List[TreatmentRecommendation]
     
     # Final output
     medical_insights: Optional[MedicalInsights]

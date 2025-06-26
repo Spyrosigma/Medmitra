@@ -29,6 +29,11 @@ class LabDocument(BaseModel):
 class RadiologyDocument(BaseModel):
     file_id: str
     file_name: str
+    summary: Optional[str] = None
+
+class RadiologyImage(BaseModel):
+    file_id: str
+    file_name: str
     findings: Optional[str] = None
     impressions: Optional[str] = None
     summary: Optional[str] = None
@@ -92,9 +97,9 @@ class MedicalInsights(BaseModel):
     case_summary: CaseSummary
     soap_note: SOAPNote
     primary_diagnosis: Diagnosis
-    differential_diagnoses: List[DifferentialDiagnosis]
-    investigation_recommendations: List[InvestigationRecommendation]
-    treatment_recommendations: List[TreatmentRecommendation]
+    # differential_diagnoses: List[DifferentialDiagnosis]
+    # investigation_recommendations: List[InvestigationRecommendation]
+    # treatment_recommendations: List[TreatmentRecommendation]
     overall_confidence_score: float = Field(ge=0.0, le=1.0)
     generated_at: datetime = Field(default_factory=datetime.now)
 

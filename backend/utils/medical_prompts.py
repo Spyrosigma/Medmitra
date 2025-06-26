@@ -1,7 +1,7 @@
 from typing import Final
 
 LAB_ANALYSIS_PROMPT: Final = '''
-Analyze the provided laboratory document and extract structured information. Return STRICT JSON only.
+Analyze the provided laboratory document and extract structured information. Return STRICT JSON only, without tripple backticks.
 
 Required JSON structure:
 {{
@@ -54,11 +54,11 @@ Input Information:
 - Radiology Summaries: {radiology_summaries}
 
 Required JSON structure:
-{{
-  "summary": "<comprehensive_case_summary>",
+{{{{
+  "comprehensive_summary": "<comprehensive_case_summary>",
   "key_findings": ["<key_finding_1>", "<key_finding_2>"],
   "confidence_score": <number>
-}}
+}}}}
 
 Guidelines:
 - Synthesize all available information
@@ -70,17 +70,14 @@ Guidelines:
 SOAP_NOTE_PROMPT: Final = '''
 Generate a SOAP note based on the case summary. Return STRICT JSON only.
 
-Case Summary:
-{case_summary}
-
 Required JSON structure:
-{{
+{{{{
   "subjective": "<patient_reported_symptoms_and_history>",
   "objective": "<objective_findings_from_exams_and_tests>",
   "assessment": "<clinical_assessment_and_working_diagnosis>",
   "plan": "<treatment_and_management_plan>",
   "confidence_score": <number>
-}}
+}}}}
 
 Guidelines:
 - Follow standard SOAP format
@@ -92,17 +89,14 @@ Guidelines:
 DIAGNOSIS_PROMPT: Final = '''
 Generate a primary diagnosis based on the SOAP note. Return STRICT JSON only.
 
-SOAP Note:
-{soap_note}
-
 Required JSON structure:
-{{
+{{{{
   "diagnosis": "<primary_diagnosis>",
   "icd_code": "<icd_10_code>",
   "description": "<detailed_description>",
   "supporting_evidence": ["<evidence_1>", "<evidence_2>"],
   "confidence_score": <number>
-}}
+}}}}
 
 Guidelines:
 - Provide most likely primary diagnosis
