@@ -18,6 +18,7 @@ interface UseGladiaSTTReturn {
   startRecording: () => Promise<void>;
   stopRecording: () => void;
   clearTranscript: () => void;
+  endSession: () => void;
 }
 
 export function useGladiaSTT({
@@ -44,16 +45,23 @@ export function useGladiaSTT({
   }, []);
 
   const handleGladiaMessage = useCallback((message: GladiaMessage) => {
+    console.log('Gladia message received:', message);
     if (message.type === 'transcript') {
       const { data } = message;
       const newTranscript = data.utterance.text;
       const isFinal = data.is_final;
       const newConfidence = data.confidence || 0;
       
+      console.log('Transcript:', { newTranscript, isFinal, newConfidence });
       setConfidence(newConfidence);
       
       if (isFinal) {
-        setFinalTranscript(prev => prev + newTranscript);
+        console.log('Final transcript, appending to existing');
+        setFinalTranscript(prev => {
+          const updated = prev + (prev ? ' ' : '') + newTranscript;
+          console.log('Updated finalTranscript:', updated);
+          return updated;
+        });
         setTranscript(''); // Clear interim transcript
         onTranscript?.(newTranscript, true);
       } else {
@@ -80,14 +88,24 @@ export function useGladiaSTT({
       setIsConnecting(true);
       setError(null);
 
-      // Initialize Gladia service
-      gladiaServiceRef.current = new GladiaService(apiKey, config);
-      
-      // Start Gladia session
-      sessionIdRef.current = await gladiaServiceRef.current.startSession();
-      
-      // Set up message handler
-      gladiaServiceRef.current.onMessage(handleGladiaMessage);
+      console.log('Starting recording...');
+      console.log('Current session active:', gladiaServiceRef.current?.isSessionActive());
+
+      // Check if we have an active session, if not create a new one
+      if (!gladiaServiceRef.current || !gladiaServiceRef.current.isSessionActive()) {
+        console.log('Creating new Gladia session');
+        // Initialize Gladia service
+        gladiaServiceRef.current = new GladiaService(apiKey, config);
+        
+        // Start Gladia session
+        sessionIdRef.current = await gladiaServiceRef.current.startSession();
+        console.log('New session started:', sessionIdRef.current);
+        
+        // Set up message handler
+        gladiaServiceRef.current.onMessage(handleGladiaMessage);
+      } else {
+        console.log('Reusing existing session:', sessionIdRef.current);
+      }
 
       // Initialize audio processor
       audioProcessorRef.current = new AudioProcessor();
@@ -113,6 +131,24 @@ export function useGladiaSTT({
 
   const stopRecording = useCallback(() => {
     try {
+      // Stop audio recording but keep the Gladia session active
+      if (audioProcessorRef.current) {
+        audioProcessorRef.current.stopRecording();
+        audioProcessorRef.current = null;
+      }
+
+      setIsRecording(false);
+      setIsConnecting(false);
+      
+      console.log('Stopped recording (session remains active)');
+    } catch (error) {
+      console.error('Error stopping recording:', error);
+    }
+  }, []);
+
+  // Cleanup function to fully end the session
+  const endSession = useCallback(() => {
+    try {
       // Stop audio recording
       if (audioProcessorRef.current) {
         audioProcessorRef.current.stopRecording();
@@ -125,24 +161,27 @@ export function useGladiaSTT({
         gladiaServiceRef.current = null;
       }
 
+      // Clear transcript state
+      setTranscript('');
+      setFinalTranscript('');
+      setConfidence(0);
+
       setIsRecording(false);
       setIsConnecting(false);
       sessionIdRef.current = null;
       
-      console.log('Stopped recording');
+      console.log('Ended Gladia session completely');
     } catch (error) {
-      console.error('Error stopping recording:', error);
+      console.error('Error ending session:', error);
     }
   }, []);
 
   // Cleanup on unmount
   useEffect(() => {
     return () => {
-      if (isRecording) {
-        stopRecording();
-      }
+      endSession();
     };
-  }, [isRecording, stopRecording]);
+  }, [endSession]);
 
   return {
     isRecording,
@@ -154,5 +193,6 @@ export function useGladiaSTT({
     startRecording,
     stopRecording,
     clearTranscript,
+    endSession,
   };
 } 

@@ -24,6 +24,25 @@ export default function CaseSummaryForm({
   placeholder = "Enter patient case summary, symptoms, medical history, and examination findings. You can type here or use the dictation feature..."
 }: CaseSummaryFormProps) {
   const gladiaApiKey = process.env.NEXT_PUBLIC_GLADIA_API_KEY;
+  
+  // Use ref to always get current content value
+  const contentRef = useRef(content);
+  
+  // Update ref whenever content changes
+  useEffect(() => {
+    contentRef.current = content;
+  }, [content]);
+
+  // Callback to handle transcript appending
+  const handleTranscriptAppend = useCallback((newTranscript: string, isFinal: boolean) => {
+    if (isFinal) {
+      // Get current content from ref to avoid stale closure
+      const currentContent = contentRef.current;
+      const separator = currentContent && !currentContent.endsWith('\n') && !currentContent.endsWith(' ') ? ' ' : '';
+      const updatedContent = currentContent + separator + newTranscript;
+      onChange(updatedContent);
+    }
+  }, [onChange]);
 
   const {
     isRecording,
@@ -35,6 +54,7 @@ export default function CaseSummaryForm({
     startRecording,
     stopRecording,
     clearTranscript,
+    endSession,
   } = useGladiaSTT({
     apiKey: gladiaApiKey || '',
     config: {
@@ -43,13 +63,7 @@ export default function CaseSummaryForm({
       bit_depth: 16,
       channels: 1
     },
-    onTranscript: (newTranscript, isFinal) => {
-      if (isFinal) {
-        // Append final transcript to case summary
-        const separator = content && !content.endsWith('\n') ? ' ' : '';
-        onChange(content + separator + newTranscript);
-      }
-    },
+    onTranscript: handleTranscriptAppend,
     onError: (error) => {
       console.error('STT Error:', error);
     }
@@ -70,7 +84,7 @@ export default function CaseSummaryForm({
 
   const handleClearAll = () => {
     onChange('');
-    clearTranscript();
+    endSession(); // End session and clear transcript state
   };
 
   return (

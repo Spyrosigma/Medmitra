@@ -17,9 +17,8 @@ export function NavigationLinks({ className }: NavigationLinksProps) {
       return pathname.startsWith('/cases');
     } else if (path === '/dashboard') {
       return pathname.startsWith('/dashboard');
-    } else if (path === '/performance') {
-      return pathname.startsWith('/performance');
-    } else {
+    }
+    else {
       return pathname === path;
     }
   };
@@ -56,19 +55,6 @@ export function NavigationLinks({ className }: NavigationLinksProps) {
       </Link>
 
 
-      <Link href="/performance">
-        <Button
-          variant="ghost"
-          size="sm"
-          className={`rounded-full w-10 h-10 sm:w-auto sm:h-auto sm:px-3 sm:py-1.5 p-0 sm:p-2 text-xs sm:text-sm font-medium transition-all duration-200 flex items-center justify-center ${isActive('/performance')
-            ? 'bg-primary/20 text-primary border border-primary/30 hover:bg-primary/20 hover:text-primary'
-            : 'hover:bg-primary/10 hover:text-primary'
-            }`}
-        >
-          <Sparkles className="w-4 h-4" />
-          <span className="hidden sm:inline whitespace-nowrap ml-2">Performance</span>
-        </Button>
-      </Link>
     </div>
   );
 } 

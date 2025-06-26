@@ -57,7 +57,7 @@ export default async function Home() {
 
   // If user is authenticated, redirect to dashboard
   if (user) {
-    redirect("/dashboard")
+    redirect("/cases")
   }
 
   // Show landing page for unauthenticated users
