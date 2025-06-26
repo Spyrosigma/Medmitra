@@ -41,6 +41,7 @@ export interface ApiResponse<T = any> {
   case?: T;
   uploaded_files?: any[];
   files?: any[];
+  ai_insights?: any;
 }
 
 class ApiClient {
