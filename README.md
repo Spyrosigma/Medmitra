@@ -1,4 +1,4 @@
-# 🩺 SpyroSigma MedMitra
+# 🩺 MedMitra
 
 MedMitra is an AI-powered medical case management system designed to assist healthcare professionals in processing patient data, analyzing medical documents (lab reports, radiology images), and generating comprehensive medical insights. It leverages advanced AI agents for document parsing, image analysis, and medical diagnosis support, streamlining the clinical workflow and providing valuable assistance in clinical decision-making.
 
