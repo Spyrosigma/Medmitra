@@ -1,93 +1,113 @@
-# 🩺 MedMitra
+# 🩺 MedMitra: AI-Powered Medical Case Management
 
-MedMitra is an AI-powered medical case management system designed to assist healthcare professionals in processing patient data, analyzing medical documents (lab reports, radiology images), and generating comprehensive medical insights. It leverages advanced AI agents for document parsing, image analysis, and medical diagnosis support, streamlining the clinical workflow and providing valuable assistance in clinical decision-making.
+[![MedMitra Live Demo](https://img.shields.io/badge/Live%20Demo-medmitra.vercel.app-blue)](https://medmitra.vercel.app)
+![Next.js](https://img.shields.io/badge/Next.js-000000?style=for-the-badge&logo=next.js&logoColor=white)
+![Google OAuth2](https://img.shields.io/badge/Google%20OAuth2-4285F4?style=for-the-badge&logo=google&logoColor=white)
+![FastAPI](https://img.shields.io/badge/FastAPI-009688?style=for-the-badge&logo=fastapi&logoColor=white)
+![Supabase](https://img.shields.io/badge/Supabase-3FCF8E?style=for-the-badge&logo=supabase&logoColor=white)
+![Koyeb](https://img.shields.io/badge/Koyeb-000000?style=for-the-badge&logo=koyeb&logoColor=white)
+![Vercel](https://img.shields.io/badge/Vercel-000000?style=for-the-badge&logo=vercel&logoColor=white)
+![Supabase Storage](https://img.shields.io/badge/Supabase%20Storage-3FCF8E?style=for-the-badge&logo=supabase&logoColor=white)
+![Supabase Auth](https://img.shields.io/badge/Supabase%20Auth-3FCF8E?style=for-the-badge&logo=supabase&logoColor=white)
+![LangGraph](https://img.shields.io/badge/LangGraph-FF4500?style=for-the-badge&logo=langchain&logoColor=white)
+![Groq API](https://img.shields.io/badge/Groq%20API-FF4500?style=for-the-badge&logo=groq&logoColor=white)
+![LlamaParse](https://img.shields.io/badge/LlamaParse-FF4500?style=for-the-badge&logo=llama&logoColor=white)
+![LangGraph Python](https://img.shields.io/badge/LangGraph%20Python-FF4500?style=for-the-badge&logo=python&logoColor=white)
+![Gladia STT](https://img.shields.io/badge/Gladia%20STT-FF4500?style=for-the-badge&logo=audio&logoColor=white)
+
+
+MedMitra is an innovative AI-powered medical case management system designed to empower healthcare professionals. It streamlines the processing of patient data, intelligently analyzes diverse medical documents (including lab reports and radiology images), and generates comprehensive medical insights. By leveraging advanced AI agents for document parsing, image analysis, and diagnosis support, MedMitra optimizes clinical workflows and provides invaluable assistance in clinical decision-making.
 
 ---
 
-
-
-https://github.com/user-attachments/assets/239577af-7c07-4fa1-aac2-aef1ff86b484
-
-
+[https://github.com/user-attachments/assets/239577af-7c07-4fa1-aac2-aef1ff86b484](https://github.com/user-attachments/assets/239577af-7c07-4fa1-aac2-aef1ff86b484)
 
 ---
 
-## ✨ Features
+## ✨ Key Features
 
-* **Patient Case Management**: Create, view, and manage patient cases with detailed patient information.
+MedMitra offers a robust set of features to enhance medical case management:
+
+* **Patient Case Management**: Effortlessly create, view, and manage patient cases with comprehensive patient information.
 * **Document Upload & Processing**: Securely upload various medical documents, including PDF lab reports and radiology images (JPG, PNG).
 * **AI-Powered Lab Report Analysis**: Automatically extract and summarize key information, lab values, and findings from uploaded PDF lab reports.
-* **AI-Powered Radiology Image Analysis**: Analyze radiology images using a vision AI agent to identify and summarize critical findings and impressions.
-* **Comprehensive Case Summaries**: Generate AI-driven, holistic summaries of patient cases by integrating doctor's notes, lab data, and radiology insights.
-* **SOAP Note Generation**: Automatically generate structured Subjective, Objective, Assessment, and Plan (SOAP) notes based on the processed case data.
-* **Primary Diagnosis Support**: Suggest a primary diagnosis, including ICD codes, descriptions, confidence scores, and supporting evidence derived from the analyzed medical data.
-* **User Authentication**: Secure user authentication and authorization powered by Supabase Auth.
-* **Responsive User Interface**: A modern, intuitive, and fully responsive web interface built with Next.js and Tailwind CSS, ensuring usability across devices.
+* **AI-Powered Radiology Image Analysis**: Utilize a sophisticated vision AI agent to analyze radiology images, identifying and summarizing critical findings and impressions.
+* **Comprehensive Case Summaries**: Generate AI-driven, holistic summaries of patient cases by seamlessly integrating doctor's notes, lab data, and radiology insights.
+* **SOAP Note Generation**: Automatically generate structured Subjective, Objective, Assessment, and Plan (SOAP) notes based on the processed case data, ensuring standardized documentation.
+* **Primary Diagnosis Support**: Receive suggested primary diagnoses, complete with ICD codes, detailed descriptions, confidence scores, and supporting evidence derived from the analyzed medical data.
+* **Secure User Authentication**: Robust user authentication and authorization powered by Supabase Auth, ensuring data privacy and access control.
+* **Responsive User Interface**: Experience a modern, intuitive, and fully responsive web interface built with Next.js and Tailwind CSS, optimized for seamless usability across all devices.
 
 ---
 
-## 🤖 AI Agentic Workflow
+## 🤖 AI Agentic Workflow: The Core of MedMitra
 
-MedMitra's core functionality is powered by a sophisticated, multi-agent system designed to analyze and synthesize medical data from various sources. This workflow is orchestrated on the backend and involves several specialized agents and processes working in concert.
+MedMitra's advanced functionality is driven by a sophisticated, multi-agent system that intelligently analyzes and synthesizes medical data from various sources. This intricate workflow is orchestrated on the backend, involving several specialized AI agents and processes working in concert.
 
 ### 1. Initial Document Processing
 
-When a new case is created and documents are uploaded, the backend initiates a two-pronged processing approach:
+Upon the creation of a new case and the upload of documents, the backend initiates a two-pronged processing approach:
 
-*   **PDF Lab Reports**: Lab reports in PDF format are processed using **LlamaParse**. This service intelligently parses the documents, extracting the raw text and preserving the structure, which is crucial for accurate analysis. The extracted text is then stored and linked to the case.
-*   **Radiology Images**: Radiology images (such as X-rays or MRIs) are stored, and their URLs are prepared for analysis by the Vision Agent.
+* **PDF Lab Reports**: Lab reports in PDF format are meticulously processed using **LlamaParse**. This service intelligently parses the documents, extracting raw text while preserving crucial structural information for accurate analysis. The extracted text is then securely stored and linked to the corresponding case.
+* **Radiology Images**: Radiology images (such as X-rays or MRIs) are stored, and their URLs are prepared for subsequent analysis by the Vision Agent.
 
-### 2. The Vision Agent: Analyzing Radiology Images
+### 2. The Vision Agent: Deep Radiology Image Analysis
 
-The **Vision Agent** is responsible for analyzing the uploaded radiology images. It leverages a powerful multimodal model (**LLaVA**) through the Groq API. For each radiology image, the agent:
-1.  Receives the image URL.
-2.  Sends the image to the multimodal model with a specialized prompt (`RADIOLOGY_ANALYSIS_PROMPT`) designed to elicit a detailed analysis.
-3.  The model returns a structured JSON object containing key findings, impressions, and a summary of the image.
-4.  This structured data is then saved and associated with the specific radiology file in the case.
+The **Vision Agent** is specifically designed for the insightful analysis of uploaded radiology images. It leverages a powerful multimodal model (**LLaVA**) accessible via the Groq API. For each radiology image, the agent executes the following steps:
 
-### 3. The Medical Insights Agent: Generating Comprehensive Analysis
+1.  **Receives Image URL**: The agent is provided with the URL of the radiology image.
+2.  **Multimodal Model Interaction**: The image is sent to the multimodal model with a specialized prompt (`RADIOLOGY_ANALYSIS_PROMPT`) crafted to elicit a detailed and comprehensive analysis.
+3.  **Structured Data Output**: The model returns a structured JSON object containing key findings, impressions, and a concise summary of the image.
+4.  **Data Storage**: This structured data is then saved and associated with the specific radiology file within the patient's case.
 
-Once the initial document processing and vision analysis are complete, the **Medical Insights Agent** takes over. This agent uses **LangGraph** to execute a reliable, state-driven workflow that synthesizes all the available data into a comprehensive medical analysis. The workflow proceeds through the following key states:
+### 3. The Medical Insights Agent: Comprehensive Medical Analysis
 
-1.  **Data Aggregation**: The agent gathers all the data for the case, including the doctor's initial notes, the text extracted from lab reports, and the structured summaries from the Vision Agent.
-2.  **Generate Case Summary**: It synthesizes all the information into a comprehensive, holistic summary of the patient's condition.
-3.  **Generate SOAP Note**: Based on the case summary, it constructs a structured **SOAP (Subjective, Objective, Assessment, Plan)** note. This is a standard format used by healthcare professionals to document patient information.
-4.  **Generate Primary Diagnosis**: Using the SOAP note and the full case context, the agent proposes a primary diagnosis, complete with an **ICD-10 code**, a description, a confidence score, and the supporting evidence from the provided documents.
-5.  **Save Results**: All the generated insights—the case summary, SOAP note, and diagnosis—are saved back to the database, marked as "completed," and made available to the user in the frontend.
+Once the initial document processing and vision analysis are complete, the **Medical Insights Agent** takes center stage. This agent utilizes **LangGraph** to execute a reliable, state-driven workflow that synthesizes all available data into a comprehensive medical analysis. The workflow progresses through the following key states:
 
-This structured, multi-agent approach ensures that each piece of medical data is processed by a specialized AI, and the results are then intelligently combined to provide clinicians with reliable, actionable insights.
+1.  **Data Aggregation**: The agent meticulously gathers all pertinent data for the case, including the doctor's initial notes, the extracted text from lab reports, and the structured summaries provided by the Vision Agent.
+2.  **Generate Case Summary**: It synthesizes all the gathered information into a comprehensive, holistic summary of the patient's condition, providing a 360-degree view.
+3.  **Generate SOAP Note**: Based on the comprehensive case summary, it constructs a structured **SOAP (Subjective, Objective, Assessment, Plan)** note. This adheres to the standard format widely used by healthcare professionals for patient documentation.
+4.  **Generate Primary Diagnosis**: Leveraging the SOAP note and the full case context, the agent intelligently proposes a primary diagnosis. This includes an **ICD-10 code**, a clear description, a confidence score, and supporting evidence meticulously extracted from the provided medical documents.
+5.  **Save Results**: All the generated insights—the comprehensive case summary, the detailed SOAP note, and the proposed diagnosis—are securely saved back to the database, marked as "completed," and seamlessly made available to the user in the frontend.
+
+This structured, multi-agent approach ensures that each piece of medical data is processed by a specialized AI, and the results are then intelligently combined to provide clinicians with reliable, actionable insights, ultimately enhancing diagnostic accuracy and treatment planning.
 
 ---
 
 ## 🚀 Technologies Used
 
+MedMitra is built using a modern and robust tech stack, ensuring high performance, scalability, and maintainability.
+
 ### Backend
 
-* **FastAPI**: A modern, high-performance web framework for building APIs with Python.
-* **Python**: The core programming language for the backend logic and AI agents.
-* **LangChain / LangGraph**: Frameworks for developing applications powered by language models, used for orchestrating complex AI workflows.
-* **Groq**: Provides fast and efficient inference for large language models (LLMs), such as Llama 3, for AI analysis.
-* **LlamaParse**: An intelligent document parsing service from LlamaIndex used for extracting structured data from PDF lab reports.
-* **Supabase**: The application utilizes the `supabase-py` library to interact with a PostgreSQL database, manage authentication, and handle file storage.
-* **Pydantic**: Used for data validation and settings management to ensure robust data models.
+* **FastAPI**: A modern, high-performance web framework for building efficient and robust APIs with Python.
+* **Python**: The core programming language powering the backend logic and sophisticated AI agents.
+* **LangChain / LangGraph**: Powerful frameworks for developing applications driven by large language models, crucial for orchestrating complex AI workflows.
+* **Groq**: Provides incredibly fast and efficient inference for large language models (LLMs), such as Llama 3, for real-time AI analysis.
+* **LlamaParse**: An intelligent document parsing service from LlamaIndex, specifically utilized for extracting structured data from PDF lab reports.
+* **Supabase**: The application leverages the `supabase-py` library for seamless interaction with a PostgreSQL database, secure user authentication, and efficient file storage.
+* **Pydantic**: Used extensively for data validation and settings management, ensuring robust data models and API integrity.
 
 ### Frontend
 
-* **Next.js**: A React framework for building server-rendered and static web applications. The development server is powered by **Turbopack** for maximum speed.
-* **React**: A JavaScript library for building user interfaces.
-* **TypeScript**: A typed superset of JavaScript that compiles to plain JavaScript, enhancing code quality and maintainability.
-* **Tailwind CSS**: A utility-first CSS framework for rapidly building custom designs.
-* **Shadcn/ui**: A collection of reusable UI components built with **Radix UI** and Tailwind CSS.
-* **Supabase**: The frontend uses the `@supabase/ssr` and `@supabase/supabase-js` libraries for seamless and secure interaction with the Supabase backend for authentication and data management.
-* **Lucide React**: A comprehensive and beautiful icon library.
-* **Next-Themes**: For easy implementation of dark/light mode theme switching.
-* **Gladia**: Integrated for real-time speech-to-text transcription.
+* **Next.js**: A powerful React framework for building server-rendered and static web applications, offering exceptional performance. The development server is powered by **Turbopack** for maximum speed.
+* **React**: A leading JavaScript library for building dynamic and interactive user interfaces.
+* **TypeScript**: A strongly typed superset of JavaScript that compiles to plain JavaScript, significantly enhancing code quality, readability, and maintainability.
+* **Tailwind CSS**: A utility-first CSS framework enabling rapid and efficient building of custom designs with minimal CSS.
+* **Shadcn/ui**: A carefully curated collection of reusable UI components built with **Radix UI** and Tailwind CSS, providing a polished and consistent user experience.
+* **Supabase**: The frontend seamlessly integrates with the Supabase backend using the `@supabase/ssr` and `@supabase/supabase-js` libraries for secure authentication and efficient data management.
+* **Lucide React**: A comprehensive and aesthetically pleasing icon library for intuitive visual communication.
+* **Next-Themes**: For easy and elegant implementation of dark/light mode theme switching, enhancing user comfort.
+* **Gladia**: Integrated for robust real-time speech-to-text transcription capabilities.
 
 ---
 
 ## 📁 Directory Structure
 
+The project follows a clear and organized directory structure to promote modularity and ease of development:
+
 ```
+
 spyrosigma-medmitra/
 ├── backend/                  \# FastAPI backend application
 │   ├── agents/               \# Contains AI agents (Medical Insights Agent, Vision Agent)
@@ -111,24 +131,26 @@ spyrosigma-medmitra/
 
 ## 🛠️ Setup and Installation
 
-Follow these steps to set up and run the MedMitra project locally.
+Follow these detailed steps to set up and run the MedMitra project locally on your machine.
 
 ### Prerequisites
 
-Before you begin, ensure you have the following installed:
+Before you begin, ensure you have the following essential software and accounts:
 
-* **Node.js**: LTS version (e.g., 18.x or 20.x). You can download it from [nodejs.org](https://nodejs.org/).
-* **npm** or **yarn**: Package managers for Node.js (usually installed with Node.js).
+* **Node.js**: LTS version (e.g., 18.x or 20.x). Download from [nodejs.org](https://nodejs.org/).
+* **npm** or **yarn**: Package managers for Node.js (typically installed with Node.js).
 * **Python**: Version 3.9 or higher. Download from [python.org](https://www.python.org/downloads/).
-* **pip**: Python package installer (comes with Python).
+* **pip**: Python package installer (comes pre-installed with Python).
 * **Supabase Project**:
     * Create a new project on [Supabase](https://supabase.com/).
     * Obtain your `Project URL` and `Service Role Key` (found under Project Settings -> API).
     * You will also need the `Anon Key` for the frontend.
 * **Groq API Key**:
-    * Sign up and get your API key from [Groq Console](https://console.groq.com/keys).
+    * Sign up and obtain your API key from the [Groq Console](https://console.groq.com/keys).
 * **LlamaParse API Key**:
-    * Sign up and get your API key from [Llama Cloud](https://cloud.llamaindex.ai/).
+    * Sign up and obtain your API key from [Llama Cloud](https://cloud.llamaindex.ai/).
+* **Gladia API Key**:
+    * Sign up at [gladia.io](https://gladia.io) and generate an API key from your dashboard.
 
 ### Backend Setup
 
@@ -144,7 +166,7 @@ Before you begin, ensure you have the following installed:
     # On macOS/Linux:
     source venv/bin/activate
     # On Windows:
-    .\\venv\\Scripts\\activate
+    .\venv\Scripts\activate
     ```
 
 3.  **Install Python dependencies:**
@@ -152,7 +174,7 @@ Before you begin, ensure you have the following installed:
     pip install -r requirements.txt
     ```
 
-4.  **Create a `.env` file** in the `backend/` directory (at the same level as `app.py`) and add your environment variables:
+4.  **Create a `.env` file** in the `backend/` directory (at the same level as `app.py`) and add your environment variables. **Replace the placeholders with your actual keys and URLs.**
 
     ```ini
     SUPABASE_URL="YOUR_SUPABASE_PROJECT_URL"
@@ -162,13 +184,12 @@ Before you begin, ensure you have the following installed:
     # WEAVIATE_API_KEY="YOUR_WEAVIATE_API_KEY" # Uncomment and set if Weaviate is integrated
     # WEAVIATE_REST_URL="YOUR_WEAVIATE_REST_URL" # Uncomment and set if Weaviate is integrated
     ```
-    *Replace placeholders with your actual keys and URLs.*
 
 5.  **Run the backend application:**
     ```bash
     uvicorn app:app --host 0.0.0.0 --port 8000 --reload
     ```
-    The backend API will be accessible at `http://localhost:8000`.
+    The backend API will now be accessible at `http://localhost:8000`.
 
 ### Frontend Setup
 
@@ -184,7 +205,7 @@ Before you begin, ensure you have the following installed:
     # yarn install
     ```
 
-3.  **Create a `.env.local` file** in the `frontend/` directory (at the same level as `package.json`) and add your environment variables for Supabase client-side and backend API URL:
+3.  **Create a `.env.local` file** in the `frontend/` directory (at the same level as `package.json`) and add your environment variables for Supabase client-side, backend API URL, and Gladia API key. **Replace the placeholders with your actual keys and URLs.**
 
     ```ini
     NEXT_PUBLIC_SUPABASE_URL="YOUR_SUPABASE_PROJECT_URL"
@@ -192,8 +213,7 @@ Before you begin, ensure you have the following installed:
     NEXT_PUBLIC_FASTAPI_BACKEND_URL="http://localhost:8000" # Use your deployed backend URL if applicable
     NEXT_PUBLIC_GLADIA_API_KEY="YOUR_GLADIA_API_KEY"
     ```
-    *Replace placeholders with your actual Supabase URL and Anon Key. The `NEXT_PUBLIC_FASTAPI_BACKEND_URL` should point to where your FastAPI backend is running.*
-    *To get your `GLADIA_API_KEY`, sign up at [gladia.io](https://gladia.io) and generate an API key from your dashboard.*
+    *The `NEXT_PUBLIC_FASTAPI_BACKEND_URL` should point to where your FastAPI backend is running.*
 
 4.  **Run the frontend development server:**
     ```bash
@@ -201,14 +221,14 @@ Before you begin, ensure you have the following installed:
     # Or if you prefer yarn:
     # yarn dev
     ```
-    The frontend uses **Turbopack**, the successor to Webpack, for a faster development experience. The application will be accessible at `http://localhost:3000`.
+    The frontend utilizes **Turbopack**, the successor to Webpack, for a significantly faster development experience. The application will be accessible at `http://localhost:3000`.
 
 ---
 
-## 🖥️ Usage
+## 🖥️ Usage Guide
 
 1.  Open your web browser and navigate to `http://localhost:3000`.
-2.  You will be prompted to sign up or log in. Use the authentication flow to create an account or access an existing one.
-3.  Once logged in, navigate to the dashboard where you can view and manage patient cases.
-4.  To create a new case, click on the "New Case" button. You can then fill in patient details and upload relevant medical documents (PDF lab reports, radiology images).
-5.  After uploading, the system will automatically process the documents using the AI agents. The generated medical insights, including case summaries, SOAP notes, and diagnoses, will be displayed within the case details.
+2.  You will be prompted to sign up or log in. Use the secure authentication flow to create a new account or access an existing one.
+3.  Once successfully logged in, you will be directed to the dashboard, where you can conveniently view and manage all your patient cases.
+4.  To create a new case, simply click on the "New Case" button. You can then fill in detailed patient information and securely upload relevant medical documents, including PDF lab reports and radiology images.
+5.  After uploading, the system will automatically initiate the document processing using its sophisticated AI agents. The generated medical insights, including comprehensive case summaries, structured SOAP notes, and primary diagnoses, will be intuitively displayed within the case details for your review.
