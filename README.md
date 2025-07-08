@@ -26,25 +26,62 @@ https://github.com/user-attachments/assets/239577af-7c07-4fa1-aac2-aef1ff86b484
 
 ---
 
+## 🤖 AI Agentic Workflow
+
+MedMitra's core functionality is powered by a sophisticated, multi-agent system designed to analyze and synthesize medical data from various sources. This workflow is orchestrated on the backend and involves several specialized agents and processes working in concert.
+
+### 1. Initial Document Processing
+
+When a new case is created and documents are uploaded, the backend initiates a two-pronged processing approach:
+
+*   **PDF Lab Reports**: Lab reports in PDF format are processed using **LlamaParse**. This service intelligently parses the documents, extracting the raw text and preserving the structure, which is crucial for accurate analysis. The extracted text is then stored and linked to the case.
+*   **Radiology Images**: Radiology images (such as X-rays or MRIs) are stored, and their URLs are prepared for analysis by the Vision Agent.
+
+### 2. The Vision Agent: Analyzing Radiology Images
+
+The **Vision Agent** is responsible for analyzing the uploaded radiology images. It leverages a powerful multimodal model (**LLaVA**) through the Groq API. For each radiology image, the agent:
+1.  Receives the image URL.
+2.  Sends the image to the multimodal model with a specialized prompt (`RADIOLOGY_ANALYSIS_PROMPT`) designed to elicit a detailed analysis.
+3.  The model returns a structured JSON object containing key findings, impressions, and a summary of the image.
+4.  This structured data is then saved and associated with the specific radiology file in the case.
+
+### 3. The Medical Insights Agent: Generating Comprehensive Analysis
+
+Once the initial document processing and vision analysis are complete, the **Medical Insights Agent** takes over. This agent uses **LangGraph** to execute a reliable, state-driven workflow that synthesizes all the available data into a comprehensive medical analysis. The workflow proceeds through the following key states:
+
+1.  **Data Aggregation**: The agent gathers all the data for the case, including the doctor's initial notes, the text extracted from lab reports, and the structured summaries from the Vision Agent.
+2.  **Generate Case Summary**: It synthesizes all the information into a comprehensive, holistic summary of the patient's condition.
+3.  **Generate SOAP Note**: Based on the case summary, it constructs a structured **SOAP (Subjective, Objective, Assessment, Plan)** note. This is a standard format used by healthcare professionals to document patient information.
+4.  **Generate Primary Diagnosis**: Using the SOAP note and the full case context, the agent proposes a primary diagnosis, complete with an **ICD-10 code**, a description, a confidence score, and the supporting evidence from the provided documents.
+5.  **Save Results**: All the generated insights—the case summary, SOAP note, and diagnosis—are saved back to the database, marked as "completed," and made available to the user in the frontend.
+
+This structured, multi-agent approach ensures that each piece of medical data is processed by a specialized AI, and the results are then intelligently combined to provide clinicians with reliable, actionable insights.
+
+---
+
 ## 🚀 Technologies Used
 
 ### Backend
 
-* **FastAPI**: A modern, fast (high-performance) web framework for building APIs with Python 3.7+.
+* **FastAPI**: A modern, high-performance web framework for building APIs with Python.
 * **Python**: The core programming language for the backend logic and AI agents.
-* **LangChain / LangGraph**: Frameworks for developing applications powered by language models, used here for orchestrating complex AI workflows.
+* **LangChain / LangGraph**: Frameworks for developing applications powered by language models, used for orchestrating complex AI workflows.
 * **Groq**: Provides fast and efficient inference for large language models (LLMs), such as Llama 3, for AI analysis.
-* **LlamaParse**: An intelligent document parsing service used for extracting structured data from PDF lab reports.
-* **Supabase**: An open-source Firebase alternative, providing PostgreSQL database, authentication, and file storage services.
-* **Pydantic**: Used for data validation and settings management, ensuring robust data models.
+* **LlamaParse**: An intelligent document parsing service from LlamaIndex used for extracting structured data from PDF lab reports.
+* **Supabase**: The application utilizes the `supabase-py` library to interact with a PostgreSQL database, manage authentication, and handle file storage.
+* **Pydantic**: Used for data validation and settings management to ensure robust data models.
 
 ### Frontend
 
-* **Next.js**: A React framework for building server-rendered and static web applications with excellent developer experience.
+* **Next.js**: A React framework for building server-rendered and static web applications. The development server is powered by **Turbopack** for maximum speed.
 * **React**: A JavaScript library for building user interfaces.
 * **TypeScript**: A typed superset of JavaScript that compiles to plain JavaScript, enhancing code quality and maintainability.
-* **Tailwind CSS**: A utility-first CSS framework for rapidly building custom designs directly in your markup.
-* **Shadcn/ui**: A collection of reusable UI components built with Tailwind CSS and Radix UI.
+* **Tailwind CSS**: A utility-first CSS framework for rapidly building custom designs.
+* **Shadcn/ui**: A collection of reusable UI components built with **Radix UI** and Tailwind CSS.
+* **Supabase**: The frontend uses the `@supabase/ssr` and `@supabase/supabase-js` libraries for seamless and secure interaction with the Supabase backend for authentication and data management.
+* **Lucide React**: A comprehensive and beautiful icon library.
+* **Next-Themes**: For easy implementation of dark/light mode theme switching.
+* **Gladia**: Integrated for real-time speech-to-text transcription.
 
 ---
 
@@ -101,12 +138,13 @@ Before you begin, ensure you have the following installed:
     ```
 
 2.  **Create a Python virtual environment and activate it:**
+    *Ensure you have Python 3.9+ installed.*
     ```bash
-    python -m venv venv
+    python3 -m venv venv
     # On macOS/Linux:
     source venv/bin/activate
     # On Windows:
-    .\venv\Scripts\activate
+    .\\venv\\Scripts\\activate
     ```
 
 3.  **Install Python dependencies:**
@@ -151,9 +189,11 @@ Before you begin, ensure you have the following installed:
     ```ini
     NEXT_PUBLIC_SUPABASE_URL="YOUR_SUPABASE_PROJECT_URL"
     NEXT_PUBLIC_SUPABASE_ANON_KEY="YOUR_SUPABASE_ANON_KEY"
-    NEXT_PUBLIC_BACKEND_API_URL="http://localhost:8000" # Use your deployed backend URL if applicable
+    NEXT_PUBLIC_FASTAPI_BACKEND_URL="http://localhost:8000" # Use your deployed backend URL if applicable
+    NEXT_PUBLIC_GLADIA_API_KEY="YOUR_GLADIA_API_KEY"
     ```
-    *Replace placeholders with your actual Supabase URL and Anon Key. The `NEXT_PUBLIC_BACKEND_API_URL` should point to where your FastAPI backend is running.*
+    *Replace placeholders with your actual Supabase URL and Anon Key. The `NEXT_PUBLIC_FASTAPI_BACKEND_URL` should point to where your FastAPI backend is running.*
+    *To get your `GLADIA_API_KEY`, sign up at [gladia.io](https://gladia.io) and generate an API key from your dashboard.*
 
 4.  **Run the frontend development server:**
     ```bash
@@ -161,7 +201,7 @@ Before you begin, ensure you have the following installed:
     # Or if you prefer yarn:
     # yarn dev
     ```
-    The frontend application will be accessible at `http://localhost:3000`.
+    The frontend uses **Turbopack**, the successor to Webpack, for a faster development experience. The application will be accessible at `http://localhost:3000`.
 
 ---
 
