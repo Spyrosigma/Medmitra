@@ -82,7 +82,7 @@ backend/
 │   ├── llm_utils.py         # LLM integration utilities
 │   ├── medical_prompts.py   # Medical AI prompts
 │   └── extractjson.py       # JSON parsing utilities
-└── 📦 pyproject.toml        # Project dependencies
+└── 📦 requirements.txt      # Project dependencies
 ```
 
 ## 🏃‍♂️ Quick Start
@@ -104,8 +104,6 @@ cd medmitra/backend
 2. **Install dependencies**
 ```bash
 pip install -r requirements.txt
-# or using uv
-uv sync
 ```
 
 3. **Environment Setup**

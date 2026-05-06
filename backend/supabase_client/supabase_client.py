@@ -182,13 +182,74 @@ class SupabaseCaseClient:
 
 
 
-    async def upload_case_file(self, file_id: str, case_id: int, file_data: Dict[str, Any], file_content) -> Dict[str, Any]:
+    async def update_case(self, case_id: str, update_data: Dict[str, Any]) -> Dict[str, Any]:
+        """
+        Update a case's data.
+
+        Args:
+            case_id (str): The ID of the case to update.
+            update_data (Dict[str, Any]): Fields to update.
+
+        Returns:
+            Dict[str, Any]: The updated case data.
+
+        Raises:
+            SupabaseClientError: If there's an error updating the case.
+        """
+        try:
+            update_data["updated_at"] = datetime.now(pytz.UTC).isoformat()
+            update_response = (
+                self.supabase.table("cases")
+                .update(update_data)
+                .eq("case_id", case_id)
+                .execute()
+            )
+            response_data = update_response.model_dump().get("data", [])
+            if response_data:
+                return response_data[0]
+            else:
+                raise SupabaseClientError(f"Case with ID {case_id} not found")
+        except Exception as e:
+            raise SupabaseClientError(f"Error updating case: {str(e)}")
+
+    async def delete_case(self, case_id: str) -> bool:
+        """
+        Delete a case and its associated files and insights.
+
+        Args:
+            case_id (str): The ID of the case to delete.
+
+        Returns:
+            bool: True if the case was successfully deleted.
+
+        Raises:
+            SupabaseClientError: If there's an error deleting the case.
+        """
+        try:
+            self.supabase.table("ai_insights").delete().eq("case_id", case_id).execute()
+            self.supabase.table("case_files").delete().eq("case_id", case_id).execute()
+
+            delete_response = (
+                self.supabase.table("cases")
+                .delete()
+                .eq("case_id", case_id)
+                .execute()
+            )
+            if delete_response.model_dump().get("data", []):
+                return True
+            return False
+        except Exception as e:
+            raise SupabaseClientError(f"Error deleting case: {str(e)}")
+
+    async def upload_case_file(self, file_id: str, case_id: str, file_data: Dict[str, Any], file_content) -> Dict[str, Any]:
         """
         Upload a file for a case.
 
         Args:
-            case_id (int): The ID of the case to upload file for.
+            file_id (str): The unique ID for the file.
+            case_id (str): The ID of the case to upload file for.
             file_data (Dict[str, Any]): File data including name, type, size, url, etc.
+            file_content: The raw file content bytes.
 
         Returns:
             Dict[str, Any]: The uploaded file record.
@@ -225,12 +286,12 @@ class SupabaseCaseClient:
         except Exception as e:
             raise SupabaseClientError(f"Error uploading file: {str(e)}")
 
-    async def get_case_files(self, case_id: int) -> List[Dict[str, Any]]:
+    async def get_case_files(self, case_id: str) -> List[Dict[str, Any]]:
         """
         Get all files for a case.
 
         Args:
-            case_id (int): The ID of the case to get files for.
+            case_id (str): The ID of the case to get files for.
 
         Returns:
             List[Dict[str, Any]]: List of files associated with the case.
@@ -252,12 +313,12 @@ class SupabaseCaseClient:
         except Exception as e:
             raise SupabaseClientError(f"Error retrieving case files: {str(e)}")
 
-    async def update_case_file_metadata(self, file_id: int, metadata: Dict[str, Any]) -> Dict[str, Any]:
+    async def update_case_file_metadata(self, file_id: str, metadata: Dict[str, Any]) -> Dict[str, Any]:
         """
         Update metadata for a specific case file.
 
         Args:
-            file_id (int): The ID of the file to update (primary key).
+            file_id (str): The ID of the file to update.
             metadata (Dict[str, Any]): Metadata to update.
 
         Returns:
@@ -284,12 +345,12 @@ class SupabaseCaseClient:
 
     
 
-    async def get_file_by_id(self, file_id: int) -> Dict[str, Any]:
+    async def get_file_by_id(self, file_id: str) -> Dict[str, Any]:
         """
         Get a specific file by ID.
 
         Args:
-            file_id (int): The ID of the file to retrieve.
+            file_id (str): The ID of the file to retrieve.
 
         Returns:
             Dict[str, Any]: The file data.
@@ -301,7 +362,7 @@ class SupabaseCaseClient:
             result = (
                 self.supabase.table("case_files")
                 .select("*")
-                .eq("id", file_id)
+                .eq("file_id", file_id)
                 .execute()
             )
 
@@ -314,13 +375,13 @@ class SupabaseCaseClient:
         except Exception as e:
             raise SupabaseClientError(f"Error retrieving file: {str(e)}")
 
-    async def delete_case_file(self, case_id: int, file_id: int) -> bool:
+    async def delete_case_file(self, case_id: str, file_id: str) -> bool:
         """
         Delete a file from a case.
 
         Args:
-            case_id (int): The ID of the case.
-            file_id (int): The ID of the file to delete.
+            case_id (str): The ID of the case.
+            file_id (str): The ID of the file to delete.
 
         Returns:
             bool: True if the file was successfully deleted.
@@ -333,7 +394,7 @@ class SupabaseCaseClient:
                 self.supabase.table("case_files")
                 .delete()
                 .eq("case_id", case_id)
-                .eq("id", file_id)
+                .eq("file_id", file_id)
                 .execute()
             )
 

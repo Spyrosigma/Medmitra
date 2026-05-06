@@ -13,7 +13,7 @@ Frontend (Next.js) ──────► Backend (FastAPI)
 
 - **Frontend**: Next.js 14 with TypeScript, Tailwind CSS, and shadcn/ui components
 - **Backend**: FastAPI with Python (separate repository)
-- **Database**: PostgreSQL (managed by FastAPI backend)
+- **Database**: PostgreSQL via Supabase
 - **Authentication**: Supabase Auth
 - **File Storage**: Handled by FastAPI backend
 
@@ -79,6 +79,9 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
 
 # FastAPI Backend
 NEXT_PUBLIC_FASTAPI_BACKEND_URL=http://localhost:8000
+
+# Gladia Speech-to-Text (optional)
+NEXT_PUBLIC_GLADIA_API_KEY=your_gladia_api_key
 ```
 
 4. Start the development server
@@ -133,14 +136,13 @@ Files are validated on the frontend before upload and stored/processed by the Fa
 - `npm run dev` - Start development server
 - `npm run build` - Build for production
 - `npm run start` - Start production server
-- `npm run lint` - Run ESLint
 
 ### Code Style
 
 - TypeScript for type safety
 - Tailwind CSS for styling
 - shadcn/ui for consistent UI components
-- ESLint and Prettier for code formatting
+- Prettier for code formatting
 
 ## Backend Integration
 

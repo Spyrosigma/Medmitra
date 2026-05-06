@@ -1,10 +1,8 @@
-from fastapi import APIRouter, HTTPException, File, UploadFile, Form, Depends, BackgroundTasks
+from fastapi import APIRouter, HTTPException, File, UploadFile, Form, BackgroundTasks
 from fastapi.responses import JSONResponse
 from typing import Optional, List
 from pydantic import BaseModel
-import json
 import uuid
-import asyncio
 import logging
 
 from supabase_client.supabase_client import SupabaseCaseClient, SupabaseClientError
@@ -35,10 +33,6 @@ class CaseUpdate(BaseModel):
 
 class AnalysisRequest(BaseModel):
     analysis_results: Optional[str] = None
-
-# We'll use this for now. Later we'll pass user_id via API routes.
-async def get_current_user_id() -> str:
-    return "b8acad4b-4944-4d66-b405-de70886e7248"
 
 @router.post("/create_case")
 async def create_case(
@@ -165,25 +159,19 @@ async def get_case_by_id(
         raise HTTPException(status_code=500, detail=f"Internal server error: {str(e)}")
 
 
-# I'll Later finish these routes. Below are incomplete routes.
-
- 
 @router.put("/cases/{case_id}")
 async def update_case(
-    case_id: int,
+    case_id: str,
     case_data: CaseUpdate,
-    user_id: str = Depends(get_current_user_id)
 ):
     """Update a specific case."""
     try:
-        # Convert Pydantic model to dict, excluding None values
         update_data = case_data.model_dump(exclude_none=True)
         
         if not update_data:
             raise HTTPException(status_code=400, detail="No data provided for update")
         
         result = await supabase_client.update_case(
-            user_id=user_id,
             case_id=case_id,
             update_data=update_data
         )
@@ -199,13 +187,10 @@ async def update_case(
         raise HTTPException(status_code=500, detail=f"Internal server error: {str(e)}")
 
 @router.delete("/cases/{case_id}")
-async def delete_case(
-    case_id: int,
-    user_id: str = Depends(get_current_user_id)
-):
-    """Delete a specific case."""
+async def delete_case(case_id: str):
+    """Delete a specific case and all associated data."""
     try:
-        success = await supabase_client.delete_case(user_id=user_id, case_id=case_id)
+        success = await supabase_client.delete_case(case_id=case_id)
         if success:
             return JSONResponse(
                 status_code=200,
@@ -220,32 +205,29 @@ async def delete_case(
 
 @router.post("/analyze/{case_id}")
 async def analyze_case(
-    case_id: int,
+    case_id: str,
+    background_tasks: BackgroundTasks,
     analysis_data: AnalysisRequest = None,
-    user_id: str = Depends(get_current_user_id)
 ):
-    """Start or complete analysis for a case."""
+    """Re-trigger AI analysis for an existing case."""
     try:
-        # Check if this is starting analysis or completing it
-        if analysis_data and analysis_data.analysis_results:
-            # Complete the analysis
-            result = await supabase_client.complete_case_analysis(
-                user_id=user_id,
-                case_id=case_id,
-                analysis_results=analysis_data.analysis_results
-            )
-            message = "Case analysis completed successfully"
-        else:
-            # Start the analysis
-            result = await supabase_client.start_case_analysis(
-                user_id=user_id,
-                case_id=case_id
-            )
-            message = "Case analysis started successfully"
-        
+        case = await supabase_client.get_case_by_id(case_id=case_id)
+
+        await supabase_client.update_case_status(case_id=case_id, status="processing")
+
+        background_tasks.add_task(
+            agentic_process,
+            case_id=case_id,
+            user_id=case.get("doctor_id", ""),
+            patient_name=case.get("patient_name", ""),
+            patient_age=case.get("patient_age", 0),
+            patient_gender=case.get("patient_gender", ""),
+            case_summary=case.get("case_summary"),
+        )
+
         return JSONResponse(
             status_code=200,
-            content={"message": message, "case": result}
+            content={"message": "Case analysis started successfully", "case": case}
         )
     except SupabaseClientError as e:
         if "not found" in str(e).lower():
@@ -256,30 +238,31 @@ async def analyze_case(
 
 @router.post("/upload")
 async def upload_file(
-    case_id: int = Form(...),
+    case_id: str = Form(...),
+    category: str = Form("lab"),
     file: UploadFile = File(...),
-    user_id: str = Depends(get_current_user_id)
 ):
-    """Upload a file for a case."""
+    """Upload a file for an existing case."""
     try:
-        # Verify that the case exists and belongs to the user
-        await supabase_client.get_case_by_id(user_id=user_id, case_id=case_id)
-        
-        # Read file content
+        await supabase_client.get_case_by_id(case_id=case_id)
+
         file_content = await file.read()
-        
-        # Here you would typically upload the file to a storage service (e.g., Supabase Storage)
-        # For now, we'll just create a record with file metadata
+        file_id = str(uuid.uuid4())
+
         file_data = {
+            "file_id": file_id,
             "file_name": file.filename,
             "file_type": file.content_type,
             "file_size": len(file_content),
-            "file_url": f"/files/{case_id}/{file.filename}",  # Placeholder URL
+            "file_url": f"{category}_files/{case_id}/{file.filename}",
+            "file_category": category,
         }
-        
+
         result = await supabase_client.upload_case_file(
+            file_id=file_id,
             case_id=case_id,
-            file_data=file_data
+            file_data=file_data,
+            file_content=file_content,
         )
         
         return JSONResponse(
@@ -294,15 +277,9 @@ async def upload_file(
         raise HTTPException(status_code=500, detail=f"Internal server error: {str(e)}")
 
 @router.get("/files/{case_id}")
-async def get_case_files(
-    case_id: int,
-    user_id: str = Depends(get_current_user_id)
-):
+async def get_case_files(case_id: str):
     """Get all files for a specific case."""
     try:
-        # Verify that the case exists and belongs to the user
-        await supabase_client.get_case_by_id(user_id=user_id, case_id=case_id)
-        
         files = await supabase_client.get_case_files(case_id=case_id)
         return JSONResponse(
             status_code=200,
@@ -316,7 +293,7 @@ async def get_case_files(
         raise HTTPException(status_code=500, detail=f"Internal server error: {str(e)}")
 
 @router.get("/file/{file_id}")
-async def get_file_by_id(file_id: int):
+async def get_file_by_id(file_id: str):
     """Get a specific file by ID."""
     try:
         file_data = await supabase_client.get_file_by_id(file_id=file_id)
@@ -332,16 +309,9 @@ async def get_file_by_id(file_id: int):
         raise HTTPException(status_code=500, detail=f"Internal server error: {str(e)}")
 
 @router.delete("/file/{file_id}")
-async def delete_file(
-    file_id: int,
-    case_id: int,
-    user_id: str = Depends(get_current_user_id)
-):
+async def delete_file(file_id: str, case_id: str):
     """Delete a specific file."""
     try:
-        # Verify that the case exists and belongs to the user
-        await supabase_client.get_case_by_id(user_id=user_id, case_id=case_id)
-        
         success = await supabase_client.delete_case_file(case_id=case_id, file_id=file_id)
         if success:
             return JSONResponse(

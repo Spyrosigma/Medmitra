@@ -1,0 +1,162 @@
+================================================================================
+                    MedMitra - Instructions to Run
+          AI-Powered Medical Case Management System
+================================================================================
+
+PREREQUISITES
+--------------------------------------------------------------------------------
+1. Python 3.9 or higher  -  https://www.python.org/downloads/
+2. Node.js 18 or higher  -  https://nodejs.org/
+3. npm (comes with Node.js)
+4. pip (comes with Python)
+5. Git (to clone the repository)
+
+REQUIRED API KEYS / ACCOUNTS
+--------------------------------------------------------------------------------
+Before running, you must obtain the following:
+
+  a) Supabase Project
+     - Create a project at https://supabase.com/
+     - Note down: Project URL, Service Role Key, and Anon Key
+     - Create three tables in Supabase: "cases", "case_files", "ai_insights"
+     - Create a storage bucket named "labdocs"
+
+  b) Groq API Key
+     - Sign up at https://console.groq.com/keys
+
+  c) LlamaParse API Key
+     - Sign up at https://cloud.llamaindex.ai/
+
+  d) Gladia API Key (optional, for speech-to-text)
+     - Sign up at https://gladia.io/
+
+
+================================================================================
+SETUP STEPS
+================================================================================
+
+STEP 1: Clone the repository
+--------------------------------------------------------------------------------
+    git clone <repository-url>
+    cd Medmitra
+
+
+STEP 2: Backend Setup
+--------------------------------------------------------------------------------
+    cd backend
+
+  2a) Create and activate a Python virtual environment:
+      (macOS / Linux)
+        python3 -m venv venv
+        source venv/bin/activate
+
+      (Windows)
+        python -m venv venv
+        .\venv\Scripts\activate
+
+  2b) Install Python dependencies:
+        pip install -r requirements.txt
+
+  2c) Create environment variables file:
+        cp .env.example .env
+
+      Then open the .env file and replace the placeholder values with your
+      actual API keys and URLs:
+        SUPABASE_URL=<your Supabase project URL>
+        SUPABASE_SERVICE_ROLE_KEY=<your Supabase service role key>
+        GROQ_API_KEY=<your Groq API key>
+        LLAMAPARSE_API_KEY=<your LlamaParse API key>
+
+  2d) Start the backend server:
+        uvicorn app:app --host 0.0.0.0 --port 8000 --reload
+
+      The backend API will be running at: http://localhost:8000
+      API docs (Swagger UI) available at: http://localhost:8000/docs
+
+
+STEP 3: Frontend Setup (open a new terminal)
+--------------------------------------------------------------------------------
+    cd frontend
+
+  3a) Install Node.js dependencies:
+        npm install
+
+  3b) Create environment variables file:
+        cp .env.example .env.local
+
+      Then open .env.local and fill in your values:
+        NEXT_PUBLIC_SUPABASE_URL=<your Supabase project URL>
+        NEXT_PUBLIC_SUPABASE_ANON_KEY=<your Supabase anon key>
+        NEXT_PUBLIC_FASTAPI_BACKEND_URL=http://localhost:8000
+        NEXT_PUBLIC_GLADIA_API_KEY=<your Gladia API key>  (optional)
+
+  3c) Start the frontend development server:
+        npm run dev
+
+      The frontend will be running at: http://localhost:3000
+
+
+================================================================================
+EXECUTION STEPS (Using the Application)
+================================================================================
+1. Open your browser and go to http://localhost:3000
+2. Sign up or log in using the authentication flow (Google OAuth or email).
+3. Once logged in, you will see the Dashboard with your existing cases.
+4. Click "New Case" to create a patient case:
+     - Enter patient name, age, and gender
+     - Write a case summary (doctor's notes)
+     - Upload lab report PDFs and/or radiology images (JPG, PNG)
+     - Submit the case
+5. The system automatically processes the uploaded documents:
+     - Lab PDFs are parsed using LlamaParse
+     - Radiology images are analyzed using the Vision AI agent
+     - The Medical Insights Agent generates a case summary, SOAP note,
+       and primary diagnosis
+6. View the completed case to see all AI-generated insights.
+
+
+================================================================================
+OUTPUT FORMAT
+================================================================================
+The AI analysis produces the following structured outputs for each case:
+
+  1. Case Summary
+     - Comprehensive summary of the patient's condition
+     - Key findings extracted from all documents
+     - Lab summary and radiology summary
+     - Confidence score (0.0 - 1.0)
+
+  2. SOAP Note
+     - Subjective: Patient's reported symptoms and history
+     - Objective: Clinical observations and test results
+     - Assessment: Clinical assessment and diagnosis reasoning
+     - Plan: Recommended treatment plan
+     - Confidence score (0.0 - 1.0)
+
+  3. Primary Diagnosis
+     - Diagnosis name
+     - ICD-10 code
+     - Description and reasoning
+     - Supporting evidence from the documents
+     - Confidence score (0.0 - 1.0)
+
+All outputs are stored in the Supabase database and displayed in the
+frontend case detail view.
+
+
+================================================================================
+RELEVANT NOTES
+================================================================================
+- Both the backend and frontend must be running simultaneously.
+- The backend processes file analysis in the background; large files may
+  take a few moments to finish processing.
+- Supported file types:
+    Lab reports : PDF
+    Radiology   : JPEG, PNG
+- Maximum file size: 10 MB per file.
+- The application uses Supabase for authentication, database, and storage.
+- API documentation is auto-generated at http://localhost:8000/docs
+- For production deployment:
+    Frontend is deployable on Vercel
+    Backend is deployable on Koyeb or any platform supporting Python/FastAPI
+================================================================================

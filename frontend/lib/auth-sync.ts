@@ -2,13 +2,20 @@ import { createClient } from "@/utils/supabase/client";
 
 export class AuthSync {
   private static instance: AuthSync;
-  private supabase = createClient();
+  private supabase: ReturnType<typeof createClient> | null = null;
   private storageKey = 'auth_sync_event';
   private authStateKey = 'supabase_auth_state';
-  private isSigningOut = false; // Prevent multiple simultaneous sign-outs
+  private isSigningOut = false;
 
   private constructor() {
     this.init();
+  }
+
+  private getSupabase() {
+    if (!this.supabase) {
+      this.supabase = createClient();
+    }
+    return this.supabase;
   }
 
   public static getInstance(): AuthSync {
@@ -24,7 +31,7 @@ export class AuthSync {
       window.addEventListener('storage', this.handleStorageChange.bind(this));
       
       // Listen for Supabase auth state changes
-      this.supabase.auth.onAuthStateChange((event, session) => {
+      this.getSupabase().auth.onAuthStateChange((event, session) => {
         if (event === 'SIGNED_OUT' && !this.isSigningOut) {
           // Only broadcast if this wasn't initiated by cross-tab sync
           this.broadcastSignOut();
@@ -71,7 +78,7 @@ export class AuthSync {
     
     try {
       // Sign out from Supabase in this tab
-      await this.supabase.auth.signOut();
+      await this.getSupabase().auth.signOut();
       
       // Redirect to home page immediately
       if (typeof window !== 'undefined') {
@@ -106,7 +113,7 @@ export class AuthSync {
 
   private async checkAuthState() {
     try {
-      const { data: { session } } = await this.supabase.auth.getSession();
+      const { data: { session } } = await this.getSupabase().auth.getSession();
       const storedAuth = localStorage.getItem(this.authStateKey);
       
       if (session && !storedAuth) {
@@ -136,7 +143,7 @@ export class AuthSync {
       this.broadcastSignOut();
       
       // Then sign out from Supabase
-      await this.supabase.auth.signOut();
+      await this.getSupabase().auth.signOut();
       
       // Redirect the current tab to home page
       if (typeof window !== 'undefined') {
